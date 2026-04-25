@@ -1,0 +1,145 @@
+'use client'
+import { useState, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
+import Link from 'next/link'
+
+export default function ProfPlanning() {
+  const [seances, setSeances] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => { fetchSeances() }, [])
+
+  async function fetchSeances() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data } = await supabase
+      .from('seances')
+      .select('*')
+      .eq('prof_id', user.id)
+      .order('date_debut', { ascending: true })
+
+    setSeances(data || [])
+    setLoading(false)
+  }
+
+  async function marquerEffectuee(id) {
+    await supabase.from('seances').update({ statut: 'effectuee' }).eq('id', id)
+    fetchSeances()
+  }
+
+  const TYPES = {
+    cours: { label: 'Cours', color: '#a78bfa' },
+    kholle: { label: 'Khôlle', color: '#34d399' },
+    entretien: { label: 'Entretien', color: '#f87171' }
+  }
+
+  const s = {
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
+    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    content: { padding: '24px 28px' },
+    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' },
+    seanceCard: { padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' },
+    stripe: { width: '3px', borderRadius: '2px', alignSelf: 'stretch', minHeight: '40px', flexShrink: 0 },
+    btn: { padding: '6px 12px', borderRadius: '8px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer' },
+    btnGhost: { background: 'rgba(255,255,255,0.06)', color: '#9e9c96', border: '1px solid rgba(255,255,255,0.07)' },
+    btnTeal: { background: '#34d399', color: '#0d1f18' },
+  }
+
+  const today = new Date().toDateString()
+  const upcoming = seances.filter(s => new Date(s.date_debut) >= new Date())
+  const past = seances.filter(s => new Date(s.date_debut) < new Date())
+
+  return (
+    <div style={{ color: '#e8e6e0' }}>
+      <div style={s.topbar}>
+        <h1 style={s.title}>Mon planning</h1>
+        <span style={{ fontSize: '12px', color: '#6e6c66' }}>
+          {upcoming.length} séance{upcoming.length > 1 ? 's' : ''} à venir
+        </span>
+      </div>
+
+      <div style={s.content}>
+        {loading ? (
+          <div style={{ color: '#6e6c66', textAlign: 'center', padding: '40px' }}>Chargement…</div>
+        ) : seances.length === 0 ? (
+          <div style={{ color: '#6e6c66', textAlign: 'center', padding: '40px' }}>
+            Aucune séance planifiée pour le moment.
+          </div>
+        ) : (
+          <>
+            {upcoming.length > 0 && (
+              <>
+                <div style={{ fontSize: '11px', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+                  À venir
+                </div>
+                {upcoming.map(seance => (
+                  <div key={seance.id} style={s.card}>
+                    <div style={s.seanceCard}>
+                      <div style={{ ...s.stripe, background: TYPES[seance.type]?.color }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>{seance.titre}</div>
+                        <div style={{ fontSize: '12px', color: '#6e6c66' }}>
+                          {new Date(seance.date_debut).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                          {' · '}
+                          {new Date(seance.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          {' – '}
+                          {new Date(seance.date_fin).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          {seance.salle && ` · ${seance.salle}`}
+                        </div>
+                      </div>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500',
+                        background: TYPES[seance.type]?.color + '22', color: TYPES[seance.type]?.color
+                      }}>
+                        {TYPES[seance.type]?.label}
+                      </span>
+                      <Link href={`/prof/appel?seance=${seance.id}`}>
+                        <button style={{ ...s.btn, ...s.btnTeal }}>Feuille d'appel →</button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {past.length > 0 && (
+              <>
+                <div style={{ fontSize: '11px', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '20px 0 10px' }}>
+                  Passées
+                </div>
+                {past.map(seance => (
+                  <div key={seance.id} style={{ ...s.card, opacity: 0.6 }}>
+                    <div style={s.seanceCard}>
+                      <div style={{ ...s.stripe, background: TYPES[seance.type]?.color }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>{seance.titre}</div>
+                        <div style={{ fontSize: '12px', color: '#6e6c66' }}>
+                          {new Date(seance.date_debut).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                          {' · '}
+                          {new Date(seance.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500',
+                        background: seance.statut === 'effectuee' ? 'rgba(52,211,153,0.12)' : 'rgba(251,191,36,0.1)',
+                        color: seance.statut === 'effectuee' ? '#34d399' : '#fbbf24'
+                      }}>
+                        {seance.statut === 'effectuee' ? 'Effectuée ✓' : 'Non pointée'}
+                      </span>
+                      {seance.statut !== 'effectuee' && (
+                        <button onClick={() => marquerEffectuee(seance.id)} style={{ ...s.btn, ...s.btnGhost }}>
+                          Marquer effectuée
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
