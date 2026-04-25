@@ -4,7 +4,7 @@
 - Next.js 16.2.4 (App Router, pas TypeScript)
 - Supabase (auth + base de données)
 - Tailwind CSS
-- Déploiement prévu sur Vercel
+- Déployé sur Vercel : https://univup.vercel.app
 
 ## Structure des dossiers
 ```
@@ -17,17 +17,17 @@ univup/
     admin/
       layout.js                → Layout admin
       sidebar.js               → Sidebar admin ('use client')
-      page.js                  → Tableau de bord (stats à 0 pour l'instant)
+      page.js                  → Tableau de bord (stats réelles)
       planning/page.js         → Planning global + création séances
       eleves/page.js           → Gestion élèves + abonnements + paiements
       profs/page.js            → Gestion profs
-      salaires/page.js         → Salaires profs (bug affichage séances à régler)
+      salaires/page.js         → Salaires profs (barème + versements + calcul auto)
     prof/
       layout.js
       sidebar.js
       page.js                  → Planning prof
       appel/page.js            → Feuille d'appel (présence + note + feedback)
-      salaire/page.js          → Placeholder
+      salaire/page.js          → Vue salaire prof (séances + versements + barème)
       ressources/page.js       → Placeholder
     eleve/
       layout.js
@@ -41,7 +41,7 @@ univup/
     supabase.js
 ```
 
-## Variables d'environnement (.env.local)
+## Variables d'environnement (.env.local ET Vercel)
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://owtubcuiogcdgsbhmsfh.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
@@ -59,7 +59,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 - bareme_profs
 - salaires_profs
 
-## Policies RLS activées (toutes en "true" pour l'instant)
+## Policies RLS (toutes en "true" pour l'instant)
 - users : select, insert, update
 - seances : select, insert, update
 - seance_eleves : select, insert, update
@@ -70,38 +70,49 @@ SUPABASE_SERVICE_ROLE_KEY=...
 
 ## Ce qui est fonctionnel ✅
 - Connexion + redirection par rôle (admin/prof/eleve)
+- Admin : tableau de bord avec stats réelles + alertes + financier
 - Admin : créer/activer/désactiver élèves et profs
 - Admin : créer séances avec sélection individuelle profs + élèves
 - Admin : créer abonnements + enregistrer virements élèves
 - Admin : activation accès automatique quand abonnement soldé
-- Admin : page salaires profs (barème + versements) — bug affichage séances à régler
-- Prof : voir son planning
+- Admin : salaires profs (barème configurable + calcul auto + versements)
+- Prof : planning
 - Prof : feuille d'appel (présence + note + feedback)
+- Prof : vue salaire (séances effectuées + versements reçus + barème)
 - Élève : planning
 - Élève : résultats (notes + feedback + moyenne + taux présence)
 - Élève : abonnement (solde + référence virement + historique)
+- Déploiement Vercel (univup.vercel.app)
+- GitHub : https://github.com/Yoyo2655/univup
 
-## Bugs connus 🐛
-- Admin salaires : les séances effectuées n'apparaissent pas dans le détail prof
-  → Problème probable : filtre date_debut avec lte mal calculé
-  → La séance est bien en statut "effectuee" en base (vérifié)
-  → À déboguer au prochain démarrage
+## Workflow de déploiement
+```bash
+git add .
+git commit -m "description"
+git push
+# Vercel redéploie automatiquement en 1-2 min
+```
+
+## Module Google Drive — EN COURS 🚧
+- Projet Google Cloud créé : univup-drive
+- API Google Drive activée
+- Compte de service créé : univup-drive-service@...
+- Fichier JSON de clé téléchargé (à garder précieusement)
+- Prochaine étape : partager le dossier "Drive UnivUp" avec l'email client_email du JSON
+- Puis : ajouter les variables d'environnement Google dans .env.local et Vercel
+- Architecture prévue :
+  → App lit les fichiers Drive via API (clé de service)
+  → Viewer PDF intégré (pas d'URL directe exposée)
+  → Signed URLs temporaires (15 min)
+  → Watermark dynamique avec prénom + email élève
+  → Contrôle d'accès par pack dans la table ressources
 
 ## Ce qui reste à construire
-- [ ] Fix bug salaires profs
-- [ ] Tableau de bord admin avec vraies stats
-- [ ] Espace prof : mon salaire (vue prof)
-- [ ] Ressources (Google Drive sync + viewer sécurisé)
+- [ ] Module ressources Google Drive (viewer sécurisé)
 - [ ] Module GEI (QCM annales + génération IA Claude)
 - [ ] Chat (élève ↔ prof + chat général)
-- [ ] Déploiement Vercel
-
-## Modules futurs planifiés
-- Sync Google Drive API (gratuit)
-- Viewer PDF sécurisé (signed URLs + watermark)
-- IA Claude API : fiches depuis PDF, flashcards, recommandations
-- QCM GEI : annales + génération IA (maths, physique, proba, info)
-- Profils élèves : fac_origine, dominante_centrale, ecoles_cibles, ecoles_gei
+- [ ] Profils élèves (fac_origine, dominante, ecoles_cibles, ecoles_gei)
+- [ ] RLS affinées par rôle (actuellement tout en "true")
 
 ## Contexte UnivUp
 - Prépa privée pour étudiants universitaires — Concours Centrale + Mines, X, ENSTA, ENSAE, ESTP
@@ -112,3 +123,4 @@ SUPABASE_SERVICE_ROLE_KEY=...
 - Paiements élèves par virement bancaire (activation manuelle par admin)
 - Salaires profs calculés automatiquement selon barème (khôlle/cours solo/cours groupe)
 - Ressources depuis Google Drive (pas de téléchargement ni partage)
+- QCM GEI : maths, physique, proba, info (annales + génération IA Claude API)
