@@ -125,43 +125,43 @@ export default function SalairesPage() {
   }
 
   const TYPES = {
-    cours: { label: 'Cours', color: '#a78bfa' },
-    kholle: { label: 'Khôlle', color: '#34d399' },
-    entretien: { label: 'Entretien', color: '#f87171' }
+    cours: { label: 'Cours', color: 'var(--purple)' },
+    kholle: { label: 'Khôlle', color: 'var(--teal)' },
+    entretien: { label: 'Entretien', color: 'var(--coral)' }
   }
 
   const MOIS_LABELS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
+    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
     btn: { padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
-    btnPrimary: { background: '#a78bfa', color: '#1a1228' },
-    btnTeal: { background: '#34d399', color: '#0d1f18' },
-    btnGhost: { background: 'rgba(255,255,255,0.06)', color: '#9e9c96', border: '1px solid rgba(255,255,255,0.07)' },
+    btnPrimary: { background: 'var(--purple)', color: '#1a1228' },
+    btnTeal: { background: 'var(--teal)', color: '#0d1f18' },
+    btnGhost: { background: 'rgba(255,255,255,0.06)', color: 'var(--muted2)', border: '1px solid var(--border)' },
     content: { padding: '24px 28px' },
-    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '13px', fontWeight: '600', color: '#e8e6e0' },
+    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
+    cardHeader: { padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    cardTitle: { fontSize: '13px', fontWeight: '600', color: 'var(--text)' },
     cardBody: { padding: '20px' },
-    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#9e9c96' },
+    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid var(--border)' },
+    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: 'var(--muted2)' },
     row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' },
-    label: { display: 'block', fontSize: '12px', color: '#9e9c96', marginBottom: '6px', marginTop: '14px' },
-    input: { width: '100%', padding: '9px 12px', background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#e8e6e0', fontSize: '13px', outline: 'none', boxSizing: 'border-box' },
+    label: { display: 'block', fontSize: '12px', color: 'var(--muted2)', marginBottom: '6px', marginTop: '14px' },
+    input: { width: '100%', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'var(--text)', fontSize: '13px', outline: 'none', boxSizing: 'border-box' },
     modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 },
-    modalBox: { background: '#18181c', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '440px' },
+    modalBox: { background: 'var(--surface)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '440px' },
   }
 
   // ═══ VUE LISTE ═══
   if (view === 'list') return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <h1 style={s.title}>Salaires profs</h1>
         <select
           value={mois}
           onChange={e => setMois(e.target.value)}
-          style={{ background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px 12px', color: '#e8e6e0', fontSize: '13px', outline: 'none' }}
+          style={{ background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px 12px', color: 'var(--text)', fontSize: '13px', outline: 'none' }}
         >
           {Array.from({ length: 12 }, (_, i) => {
             const d = new Date(2026, i, 1)
@@ -173,9 +173,9 @@ export default function SalairesPage() {
       <div style={s.content}>
         <div style={s.card}>
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>Chargement…</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>Chargement…</div>
           ) : profs.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>Aucun prof actif.</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>Aucun prof actif.</div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
@@ -189,12 +189,12 @@ export default function SalairesPage() {
               <tbody>
                 {profs.map(prof => (
                   <tr key={prof.id} style={{ cursor: 'pointer' }} onClick={() => openProf(prof)}>
-                    <td style={{ ...s.td, color: '#e8e6e0', fontWeight: '500' }}>{prof.full_name}</td>
+                    <td style={{ ...s.td, color: 'var(--text)', fontWeight: '500' }}>{prof.full_name}</td>
                     <td style={s.td}>{prof.email}</td>
                     <td style={s.td}>
                       <span style={{
                         padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500',
-                        background: 'rgba(167,139,250,0.12)', color: '#a78bfa'
+                        background: 'rgba(167,139,250,0.12)', color: 'var(--purple)'
                       }}>
                         Voir détail →
                       </span>
@@ -216,21 +216,21 @@ export default function SalairesPage() {
 
   // ═══ VUE DETAIL PROF ═══
   return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={() => { setView('list'); setSelectedProf(null) }}
             style={{ ...s.btn, ...s.btnGhost, padding: '6px 10px' }}>← Retour</button>
           <div>
             <h1 style={s.title}>{selectedProf?.full_name}</h1>
-            <div style={{ fontSize: '12px', color: '#6e6c66', marginTop: '2px' }}>{selectedProf?.email}</div>
+            <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>{selectedProf?.email}</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <select
             value={mois}
             onChange={async e => { setMois(e.target.value); await fetchProfData(selectedProf.id) }}
-            style={{ background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px 12px', color: '#e8e6e0', fontSize: '13px', outline: 'none' }}
+            style={{ background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px 12px', color: 'var(--text)', fontSize: '13px', outline: 'none' }}
           >
             {Array.from({ length: 12 }, (_, i) => {
               const d = new Date(2026, i, 1)
@@ -261,26 +261,26 @@ export default function SalairesPage() {
             <div style={s.cardHeader}><span style={s.cardTitle}>Récap {MOIS_LABELS[parseInt(mois.split('-')[1]) - 1]}</span></div>
             <div style={s.cardBody}>
               {!bareme ? (
-                <div style={{ color: '#6e6c66', fontSize: '12px' }}>
+                <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
                   Aucun barème défini — clique sur "Définir barème" pour commencer.
                 </div>
               ) : (
                 <>
                   <div style={s.row}>
-                    <span style={{ color: '#6e6c66' }}>Séances effectuées</span>
+                    <span style={{ color: 'var(--muted)' }}>Séances effectuées</span>
                     <span style={{ fontFamily: 'monospace' }}>{seances.length}</span>
                   </div>
                   <div style={s.row}>
-                    <span style={{ color: '#6e6c66' }}>Total dû</span>
-                    <span style={{ fontFamily: 'monospace', color: '#a78bfa', fontWeight: '600' }}>{totalDu.toFixed(2)}€</span>
+                    <span style={{ color: 'var(--muted)' }}>Total dû</span>
+                    <span style={{ fontFamily: 'monospace', color: 'var(--purple)', fontWeight: '600' }}>{totalDu.toFixed(2)}€</span>
                   </div>
                   <div style={s.row}>
-                    <span style={{ color: '#6e6c66' }}>Déjà versé</span>
-                    <span style={{ fontFamily: 'monospace', color: '#34d399' }}>{totalVerse.toFixed(2)}€</span>
+                    <span style={{ color: 'var(--muted)' }}>Déjà versé</span>
+                    <span style={{ fontFamily: 'monospace', color: 'var(--teal)' }}>{totalVerse.toFixed(2)}€</span>
                   </div>
                   <div style={{ ...s.row, borderBottom: 'none' }}>
-                    <span style={{ color: '#6e6c66' }}>Reste à verser</span>
-                    <span style={{ fontFamily: 'monospace', fontWeight: '600', color: resteAVerser > 0 ? '#fbbf24' : '#34d399' }}>
+                    <span style={{ color: 'var(--muted)' }}>Reste à verser</span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: '600', color: resteAVerser > 0 ? 'var(--amber)' : 'var(--teal)' }}>
                       {resteAVerser > 0 ? `${resteAVerser.toFixed(2)}€` : '✓ Soldé'}
                     </span>
                   </div>
@@ -315,10 +315,10 @@ export default function SalairesPage() {
         <div style={s.card}>
           <div style={s.cardHeader}>
             <span style={s.cardTitle}>Séances effectuées ce mois</span>
-            <span style={{ fontSize: '11px', color: '#6e6c66' }}>{seances.length} séance{seances.length > 1 ? 's' : ''}</span>
+            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{seances.length} séance{seances.length > 1 ? 's' : ''}</span>
           </div>
           {seances.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', color: '#6e6c66', fontSize: '13px' }}>
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
               Aucune séance pointée ce mois.
             </div>
           ) : (
@@ -338,7 +338,7 @@ export default function SalairesPage() {
                   return (
                     <tr key={seance.id}>
                       <td style={s.td}>{new Date(seance.date_debut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</td>
-                      <td style={{ ...s.td, color: '#e8e6e0' }}>{seance.titre}</td>
+                      <td style={{ ...s.td, color: 'var(--text)' }}>{seance.titre}</td>
                       <td style={s.td}>
                         <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[seance.type]?.color + '22', color: TYPES[seance.type]?.color }}>
                           {TYPES[seance.type]?.label}
@@ -346,7 +346,7 @@ export default function SalairesPage() {
                       </td>
                       <td style={s.td}>{nbEleves}</td>
                       <td style={s.td}>{dureeH}h</td>
-                      <td style={{ ...s.td, color: '#a78bfa', fontFamily: 'monospace', fontWeight: '600' }}>
+                      <td style={{ ...s.td, color: 'var(--purple)', fontFamily: 'monospace', fontWeight: '600' }}>
                         {bareme ? `${montant.toFixed(2)}€` : '—'}
                       </td>
                     </tr>
@@ -371,9 +371,9 @@ export default function SalairesPage() {
                 {versements.map(v => (
                   <tr key={v.id}>
                     <td style={s.td}>{new Date(v.date_versement).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</td>
-                    <td style={{ ...s.td, color: '#34d399', fontFamily: 'monospace', fontWeight: '600' }}>+{v.montant_verse}€</td>
+                    <td style={{ ...s.td, color: 'var(--teal)', fontFamily: 'monospace', fontWeight: '600' }}>+{v.montant_verse}€</td>
                     <td style={s.td}>
-                      <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: v.statut === 'solde' ? 'rgba(52,211,153,0.12)' : 'rgba(251,191,36,0.1)', color: v.statut === 'solde' ? '#34d399' : '#fbbf24' }}>
+                      <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: v.statut === 'solde' ? 'rgba(52,211,153,0.12)' : 'rgba(251,191,36,0.1)', color: v.statut === 'solde' ? 'var(--teal)' : 'var(--amber)' }}>
                         {v.statut === 'solde' ? 'Soldé' : 'Partiel'}
                       </span>
                     </td>
@@ -389,10 +389,10 @@ export default function SalairesPage() {
       {showBareme && (
         <div style={s.modal} onClick={() => setShowBareme(false)}>
           <div style={s.modalBox} onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: '#e8e6e0', fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
+            <h2 style={{ color: 'var(--text)', fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
               Barème — {selectedProf?.full_name}
             </h2>
-            <p style={{ color: '#6e6c66', fontSize: '12px', marginBottom: '16px' }}>Tarifs en €/heure</p>
+            <p style={{ color: 'var(--muted)', fontSize: '12px', marginBottom: '16px' }}>Tarifs en €/heure</p>
             <form onSubmit={saveBareme}>
               <label style={{ ...s.label, marginTop: 0 }}>Khôlle (€/h)</label>
               <input style={s.input} type="number" step="0.5" value={baremeForm.tarif_kholle} onChange={e => setBaremeForm({ ...baremeForm, tarif_kholle: e.target.value })} required placeholder="Ex: 60" />

@@ -123,36 +123,36 @@ export default function ElevesPage() {
   const resteAPayer = abonnement ? parseFloat(abonnement.montant) - totalVerse : 0
 
   const STATUT = {
-    actif: { label: 'Actif', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-    en_attente: { label: 'En attente', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-    expire: { label: 'Expiré', color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
+    actif: { label: 'Actif', color: 'var(--teal)', bg: 'rgba(52,211,153,0.12)' },
+    en_attente: { label: 'En attente', color: 'var(--amber)', bg: 'rgba(251,191,36,0.1)' },
+    expire: { label: 'Expiré', color: 'var(--coral)', bg: 'rgba(248,113,113,0.1)' },
   }
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
+    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
     btn: { padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
-    btnPrimary: { background: '#a78bfa', color: '#1a1228' },
-    btnTeal: { background: '#34d399', color: '#0d1f18' },
-    btnGhost: { background: 'rgba(255,255,255,0.06)', color: '#9e9c96', border: '1px solid rgba(255,255,255,0.07)' },
+    btnPrimary: { background: 'var(--purple)', color: '#1a1228' },
+    btnTeal: { background: 'var(--teal)', color: '#0d1f18' },
+    btnGhost: { background: 'rgba(255,255,255,0.06)', color: 'var(--muted2)', border: '1px solid var(--border)' },
     content: { padding: '24px 28px' },
-    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '13px', fontWeight: '600', color: '#e8e6e0' },
+    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
+    cardHeader: { padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    cardTitle: { fontSize: '13px', fontWeight: '600', color: 'var(--text)' },
     cardBody: { padding: '20px' },
     table: { width: '100%', borderCollapse: 'collapse' },
-    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#9e9c96' },
+    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid var(--border)' },
+    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: 'var(--muted2)' },
     modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 },
-    modalBox: { background: '#18181c', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px' },
-    label: { display: 'block', fontSize: '12px', color: '#9e9c96', marginBottom: '6px', marginTop: '14px' },
-    input: { width: '100%', padding: '9px 12px', background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#e8e6e0', fontSize: '13px', outline: 'none', boxSizing: 'border-box' },
+    modalBox: { background: 'var(--surface)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px' },
+    label: { display: 'block', fontSize: '12px', color: 'var(--muted2)', marginBottom: '6px', marginTop: '14px' },
+    input: { width: '100%', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'var(--text)', fontSize: '13px', outline: 'none', boxSizing: 'border-box' },
     row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' },
   }
 
   // ═══ VUE LISTE ═══
   if (view === 'list') return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <h1 style={s.title}>Élèves & abonnements</h1>
         <button style={{ ...s.btn, ...s.btnPrimary }} onClick={() => setShowForm(true)}>+ Créer un élève</button>
@@ -160,9 +160,9 @@ export default function ElevesPage() {
       <div style={s.content}>
         <div style={s.card}>
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>Chargement…</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>Chargement…</div>
           ) : eleves.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>Aucun élève — crée le premier compte.</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>Aucun élève — crée le premier compte.</div>
           ) : (
             <table style={s.table}>
               <thead>
@@ -177,14 +177,14 @@ export default function ElevesPage() {
               <tbody>
                 {eleves.map(eleve => (
                   <tr key={eleve.id} style={{ cursor: 'pointer' }} onClick={() => openEleve(eleve)}>
-                    <td style={{ ...s.td, color: '#e8e6e0', fontWeight: '500' }}>{eleve.full_name}</td>
+                    <td style={{ ...s.td, color: 'var(--text)', fontWeight: '500' }}>{eleve.full_name}</td>
                     <td style={s.td}>{eleve.email}</td>
-                    <td style={s.td}>{eleve.abonnements?.[0]?.pack_nom || <span style={{ color: '#6e6c66' }}>—</span>}</td>
+                    <td style={s.td}>{eleve.abonnements?.[0]?.pack_nom || <span style={{ color: 'var(--muted)' }}>—</span>}</td>
                     <td style={s.td}>
                       <span style={{
                         padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500',
                         background: eleve.is_active ? 'rgba(52,211,153,0.12)' : 'rgba(248,113,113,0.1)',
-                        color: eleve.is_active ? '#34d399' : '#f87171'
+                        color: eleve.is_active ? 'var(--teal)' : 'var(--coral)'
                       }}>
                         {eleve.is_active ? 'Actif' : 'Inactif'}
                       </span>
@@ -206,7 +206,7 @@ export default function ElevesPage() {
       {showForm && (
         <div style={s.modal} onClick={() => setShowForm(false)}>
           <div style={s.modalBox} onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: '#e8e6e0', fontSize: '16px', fontWeight: '600', marginBottom: '20px' }}>Créer un élève</h2>
+            <h2 style={{ color: 'var(--text)', fontSize: '16px', fontWeight: '600', marginBottom: '20px' }}>Créer un élève</h2>
             <form onSubmit={createEleve}>
               <label style={s.label}>Nom complet</label>
               <input style={s.input} value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required placeholder="Prénom Nom" />
@@ -214,7 +214,7 @@ export default function ElevesPage() {
               <input style={s.input} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required placeholder="eleve@email.com" />
               <label style={s.label}>Mot de passe provisoire</label>
               <input style={s.input} type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required minLength={6} placeholder="Min. 6 caractères" />
-              {error && <div style={{ color: '#f87171', fontSize: '12px', margin: '12px 0' }}>{error}</div>}
+              {error && <div style={{ color: 'var(--coral)', fontSize: '12px', margin: '12px 0' }}>{error}</div>}
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '20px' }}>
                 <button type="button" style={{ ...s.btn, ...s.btnGhost }} onClick={() => setShowForm(false)}>Annuler</button>
                 <button type="submit" style={{ ...s.btn, ...s.btnPrimary }} disabled={saving}>{saving ? 'Création…' : 'Créer'}</button>
@@ -228,14 +228,14 @@ export default function ElevesPage() {
 
   // ═══ VUE DETAIL ÉLÈVE ═══
   return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={() => { setView('list'); setSelectedEleve(null) }}
             style={{ ...s.btn, ...s.btnGhost, padding: '6px 10px' }}>← Retour</button>
           <div>
             <h1 style={s.title}>{selectedEleve?.full_name}</h1>
-            <div style={{ fontSize: '12px', color: '#6e6c66', marginTop: '2px' }}>{selectedEleve?.email}</div>
+            <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>{selectedEleve?.email}</div>
           </div>
         </div>
         <button onClick={() => toggleAccess(selectedEleve.id, selectedEleve.is_active)}
@@ -263,7 +263,7 @@ export default function ElevesPage() {
             <div style={s.cardBody}>
               {!abonnement ? (
                 <form onSubmit={createAbonnement}>
-                  <div style={{ color: '#6e6c66', fontSize: '12px', marginBottom: '16px' }}>Aucun abonnement — crées-en un.</div>
+                  <div style={{ color: 'var(--muted)', fontSize: '12px', marginBottom: '16px' }}>Aucun abonnement — crées-en un.</div>
                   <label style={{ ...s.label, marginTop: 0 }}>Nom du pack</label>
                   <input style={s.input} value={aboForm.pack_nom} onChange={e => setAboForm({ ...aboForm, pack_nom: e.target.value })} required placeholder="Ex: Pack Complet Centrale" />
                   <label style={s.label}>Montant total (€)</label>
@@ -278,18 +278,18 @@ export default function ElevesPage() {
                 </form>
               ) : (
                 <>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#a78bfa', marginBottom: '16px' }}>{abonnement.pack_nom}</div>
-                  <div style={s.row}><span style={{ color: '#6e6c66' }}>Montant total</span><span style={{ fontFamily: 'monospace' }}>{abonnement.montant}€</span></div>
-                  <div style={s.row}><span style={{ color: '#6e6c66' }}>Versé</span><span style={{ fontFamily: 'monospace', color: '#34d399' }}>{totalVerse.toFixed(2)}€</span></div>
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--purple)', marginBottom: '16px' }}>{abonnement.pack_nom}</div>
+                  <div style={s.row}><span style={{ color: 'var(--muted)' }}>Montant total</span><span style={{ fontFamily: 'monospace' }}>{abonnement.montant}€</span></div>
+                  <div style={s.row}><span style={{ color: 'var(--muted)' }}>Versé</span><span style={{ fontFamily: 'monospace', color: 'var(--teal)' }}>{totalVerse.toFixed(2)}€</span></div>
                   <div style={{ ...s.row, borderBottom: 'none' }}>
-                    <span style={{ color: '#6e6c66' }}>Reste</span>
-                    <span style={{ fontFamily: 'monospace', color: resteAPayer > 0 ? '#fbbf24' : '#34d399' }}>
+                    <span style={{ color: 'var(--muted)' }}>Reste</span>
+                    <span style={{ fontFamily: 'monospace', color: resteAPayer > 0 ? 'var(--amber)' : 'var(--teal)' }}>
                       {resteAPayer > 0 ? `${resteAPayer.toFixed(2)}€` : '✓ Soldé'}
                     </span>
                   </div>
-                  <div style={{ marginTop: '14px', padding: '10px 12px', background: '#1e1e24', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '10px', color: '#6e6c66', marginBottom: '4px' }}>Référence virement</div>
-                    <div style={{ fontFamily: 'monospace', color: '#a78bfa', fontSize: '14px' }}>{abonnement.reference_virement}</div>
+                  <div style={{ marginTop: '14px', padding: '10px 12px', background: 'var(--surface2)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--muted)', marginBottom: '4px' }}>Référence virement</div>
+                    <div style={{ fontFamily: 'monospace', color: 'var(--purple)', fontSize: '14px' }}>{abonnement.reference_virement}</div>
                   </div>
                 </>
               )}
@@ -309,7 +309,7 @@ export default function ElevesPage() {
                   <button type="submit" style={{ ...s.btn, ...s.btnTeal, marginTop: '16px', width: '100%' }} disabled={saving}>
                     {saving ? 'Enregistrement…' : 'Confirmer le virement'}
                   </button>
-                  <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '8px', textAlign: 'center' }}>
                     Si le total atteint {abonnement.montant}€, l'accès sera activé automatiquement.
                   </div>
                 </form>
@@ -323,10 +323,10 @@ export default function ElevesPage() {
           <div style={s.card}>
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Historique des paiements</span>
-              <span style={{ fontSize: '11px', color: '#6e6c66' }}>{paiements.length} virement{paiements.length > 1 ? 's' : ''}</span>
+              <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{paiements.length} virement{paiements.length > 1 ? 's' : ''}</span>
             </div>
             {paiements.length === 0 ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#6e6c66', fontSize: '13px' }}>Aucun paiement enregistré.</div>
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>Aucun paiement enregistré.</div>
             ) : (
               <table style={s.table}>
                 <thead>
@@ -340,7 +340,7 @@ export default function ElevesPage() {
                   {paiements.map(p => (
                     <tr key={p.id}>
                       <td style={s.td}>{new Date(p.date_virement).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</td>
-                      <td style={{ ...s.td, color: '#34d399', fontFamily: 'monospace', fontWeight: '600' }}>+{p.montant}€</td>
+                      <td style={{ ...s.td, color: 'var(--teal)', fontFamily: 'monospace', fontWeight: '600' }}>+{p.montant}€</td>
                       <td style={s.td}>Admin</td>
                     </tr>
                   ))}

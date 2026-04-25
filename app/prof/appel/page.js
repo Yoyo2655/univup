@@ -62,9 +62,9 @@ function AppelContent() {
   }
 
   const TYPES = {
-    cours: { label: 'Cours', color: '#a78bfa' },
-    kholle: { label: 'Khôlle', color: '#34d399' },
-    entretien: { label: 'Entretien', color: '#f87171' }
+    cours: { label: 'Cours', color: 'var(--purple)' },
+    kholle: { label: 'Khôlle', color: 'var(--teal)' },
+    entretien: { label: 'Entretien', color: 'var(--coral)' }
   }
 
   const presents = eleves.filter(e => e.presence === 'present').length
@@ -72,32 +72,32 @@ function AppelContent() {
   const retards = eleves.filter(e => e.presence === 'retard').length
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
+    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
     content: { padding: '24px 28px' },
     btn: { padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
-    btnTeal: { background: '#34d399', color: '#0d1f18' },
-    btnGhost: { background: 'rgba(255,255,255,0.06)', color: '#9e9c96', border: '1px solid rgba(255,255,255,0.07)' },
-    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' },
-    input: { padding: '6px 10px', background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#e8e6e0', fontSize: '12px', outline: 'none' },
+    btnTeal: { background: 'var(--teal)', color: '#0d1f18' },
+    btnGhost: { background: 'rgba(255,255,255,0.06)', color: 'var(--muted2)', border: '1px solid var(--border)' },
+    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' },
+    input: { padding: '6px 10px', background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'var(--text)', fontSize: '12px', outline: 'none' },
   }
 
   if (!seanceId) return (
-    <div style={{ padding: '40px', color: '#6e6c66', textAlign: 'center' }}>
+    <div style={{ padding: '40px', color: 'var(--muted)', textAlign: 'center' }}>
       Accède à la feuille d'appel depuis ton planning.
     </div>
   )
 
   if (loading) return (
-    <div style={{ padding: '40px', color: '#6e6c66', textAlign: 'center' }}>Chargement…</div>
+    <div style={{ padding: '40px', color: 'var(--muted)', textAlign: 'center' }}>Chargement…</div>
   )
 
   return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <div>
           <h1 style={s.title}>{seance?.titre}</h1>
-          <div style={{ fontSize: '12px', color: '#6e6c66', marginTop: '3px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '3px' }}>
             {new Date(seance?.date_debut).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
             {' · '}
             {new Date(seance?.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -108,9 +108,9 @@ function AppelContent() {
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
-            <span style={{ color: '#34d399' }}>✓ {presents} présent{presents > 1 ? 's' : ''}</span>
-            <span style={{ color: '#f87171' }}>✗ {absents} absent{absents > 1 ? 's' : ''}</span>
-            <span style={{ color: '#fbbf24' }}>⏱ {retards} retard{retards > 1 ? 's' : ''}</span>
+            <span style={{ color: 'var(--teal)' }}>✓ {presents} présent{presents > 1 ? 's' : ''}</span>
+            <span style={{ color: 'var(--coral)' }}>✗ {absents} absent{absents > 1 ? 's' : ''}</span>
+            <span style={{ color: 'var(--amber)' }}>⏱ {retards} retard{retards > 1 ? 's' : ''}</span>
           </div>
           <button
             onClick={saveAppel}
@@ -124,7 +124,7 @@ function AppelContent() {
 
       <div style={s.content}>
         {eleves.length === 0 ? (
-          <div style={{ color: '#6e6c66', textAlign: 'center', padding: '40px' }}>
+          <div style={{ color: 'var(--muted)', textAlign: 'center', padding: '40px' }}>
             Aucun élève associé à cette séance.
           </div>
         ) : (
@@ -135,7 +135,7 @@ function AppelContent() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                   <div style={{
                     width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
-                    background: 'rgba(96,165,250,0.12)', color: '#60a5fa',
+                    background: 'rgba(96,165,250,0.12)', color: 'var(--blue)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '12px', fontWeight: '600'
                   }}>
@@ -143,15 +143,15 @@ function AppelContent() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '14px', fontWeight: '500' }}>{e.eleve?.full_name}</div>
-                    <div style={{ fontSize: '11px', color: '#6e6c66' }}>{e.eleve?.email}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{e.eleve?.email}</div>
                   </div>
 
                   {/* Boutons présence */}
                   <div style={{ display: 'flex', gap: '6px' }}>
                     {[
-                      { val: 'present', label: '✓ Présent', bg: 'rgba(52,211,153,0.12)', color: '#34d399', border: '#34d399' },
-                      { val: 'absent', label: '✗ Absent', bg: 'rgba(248,113,113,0.1)', color: '#f87171', border: '#f87171' },
-                      { val: 'retard', label: '⏱ Retard', bg: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '#fbbf24' },
+                      { val: 'present', label: '✓ Présent', bg: 'rgba(52,211,153,0.12)', color: 'var(--teal)', border: 'var(--teal)' },
+                      { val: 'absent', label: '✗ Absent', bg: 'rgba(248,113,113,0.1)', color: 'var(--coral)', border: 'var(--coral)' },
+                      { val: 'retard', label: '⏱ Retard', bg: 'rgba(251,191,36,0.1)', color: 'var(--amber)', border: 'var(--amber)' },
                     ].map(opt => (
                       <button
                         key={opt.val}
@@ -160,7 +160,7 @@ function AppelContent() {
                           padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500', cursor: 'pointer',
                           border: `1px solid ${e.presence === opt.val ? opt.border : 'rgba(255,255,255,0.1)'}`,
                           background: e.presence === opt.val ? opt.bg : 'none',
-                          color: e.presence === opt.val ? opt.color : '#6e6c66',
+                          color: e.presence === opt.val ? opt.color : 'var(--muted)',
                         }}
                       >
                         {opt.label}
@@ -172,7 +172,7 @@ function AppelContent() {
                 {/* Note + feedback si présent */}
                 {e.presence === 'present' && (
                   <div style={{ display: 'flex', gap: '10px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', color: '#6e6c66', minWidth: '55px' }}>Note /20</span>
+                    <span style={{ fontSize: '12px', color: 'var(--muted)', minWidth: '55px' }}>Note /20</span>
                     <input
                       type="number" min="0" max="20" step="0.5"
                       value={e.note}
@@ -180,7 +180,7 @@ function AppelContent() {
                       placeholder="—"
                       style={{ ...s.input, width: '70px', textAlign: 'center' }}
                     />
-                    <span style={{ fontSize: '12px', color: '#6e6c66', minWidth: '65px', marginLeft: '8px' }}>Feedback</span>
+                    <span style={{ fontSize: '12px', color: 'var(--muted)', minWidth: '65px', marginLeft: '8px' }}>Feedback</span>
                     <input
                       type="text"
                       value={e.feedback}
@@ -201,7 +201,7 @@ function AppelContent() {
 
 export default function AppelPage() {
   return (
-    <Suspense fallback={<div style={{ padding: '40px', color: '#6e6c66' }}>Chargement…</div>}>
+    <Suspense fallback={<div style={{ padding: '40px', color: 'var(--muted)' }}>Chargement…</div>}>
       <AppelContent />
     </Suspense>
   )

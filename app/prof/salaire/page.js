@@ -65,37 +65,37 @@ export default function ProfSalairePage() {
   const resteARecevoir = totalDu - totalVerse
 
   const TYPES = {
-    cours: { label: 'Cours', color: '#a78bfa' },
-    kholle: { label: 'Khôlle', color: '#34d399' },
-    entretien: { label: 'Entretien', color: '#f87171' }
+    cours: { label: 'Cours', color: 'var(--purple)' },
+    kholle: { label: 'Khôlle', color: 'var(--teal)' },
+    entretien: { label: 'Entretien', color: 'var(--coral)' }
   }
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
+    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
     content: { padding: '24px 28px' },
-    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '13px', fontWeight: '600', color: '#e8e6e0' },
+    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
+    cardHeader: { padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    cardTitle: { fontSize: '13px', fontWeight: '600', color: 'var(--text)' },
     cardBody: { padding: '20px' },
-    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#9e9c96' },
+    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid var(--border)' },
+    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: 'var(--muted2)' },
     row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' },
-    statCard: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '16px' },
+    statCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px' },
   }
 
   if (loading) return (
-    <div style={{ padding: '40px', color: '#6e6c66', textAlign: 'center' }}>Chargement…</div>
+    <div style={{ padding: '40px', color: 'var(--muted)', textAlign: 'center' }}>Chargement…</div>
   )
 
   return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <h1 style={s.title}>Mon salaire</h1>
         <select
           value={mois}
           onChange={e => setMois(e.target.value)}
-          style={{ background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px 12px', color: '#e8e6e0', fontSize: '13px', outline: 'none' }}
+          style={{ background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px 12px', color: 'var(--text)', fontSize: '13px', outline: 'none' }}
         >
           {Array.from({ length: 12 }, (_, i) => {
             const d = new Date(2026, i, 1)
@@ -108,7 +108,7 @@ export default function ProfSalairePage() {
       <div style={s.content}>
         {!bareme ? (
           <div style={{ ...s.card }}>
-            <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>
               Aucun barème défini — contacte l'admin pour configurer ton tarif.
             </div>
           </div>
@@ -117,18 +117,18 @@ export default function ProfSalairePage() {
             {/* Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '24px' }}>
               <div style={s.statCard}>
-                <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '8px' }}>Total dû</div>
-                <div style={{ fontSize: '28px', fontWeight: '600', color: '#a78bfa' }}>{totalDu.toFixed(2)}€</div>
-                <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '4px' }}>{seances.length} séance{seances.length > 1 ? 's' : ''}</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Total dû</div>
+                <div style={{ fontSize: '28px', fontWeight: '600', color: 'var(--purple)' }}>{totalDu.toFixed(2)}€</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>{seances.length} séance{seances.length > 1 ? 's' : ''}</div>
               </div>
               <div style={s.statCard}>
-                <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '8px' }}>Déjà versé</div>
-                <div style={{ fontSize: '28px', fontWeight: '600', color: '#34d399' }}>{totalVerse.toFixed(2)}€</div>
-                <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '4px' }}>{versements.length} versement{versements.length > 1 ? 's' : ''}</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Déjà versé</div>
+                <div style={{ fontSize: '28px', fontWeight: '600', color: 'var(--teal)' }}>{totalVerse.toFixed(2)}€</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>{versements.length} versement{versements.length > 1 ? 's' : ''}</div>
               </div>
               <div style={s.statCard}>
-                <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '8px' }}>Reste à recevoir</div>
-                <div style={{ fontSize: '28px', fontWeight: '600', color: resteARecevoir > 0 ? '#fbbf24' : '#34d399' }}>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Reste à recevoir</div>
+                <div style={{ fontSize: '28px', fontWeight: '600', color: resteARecevoir > 0 ? 'var(--amber)' : 'var(--teal)' }}>
                   {resteARecevoir > 0 ? `${resteARecevoir.toFixed(2)}€` : '✓ Soldé'}
                 </div>
               </div>
@@ -138,10 +138,10 @@ export default function ProfSalairePage() {
             <div style={s.card}>
               <div style={s.cardHeader}>
                 <span style={s.cardTitle}>Séances effectuées</span>
-                <span style={{ fontSize: '11px', color: '#6e6c66' }}>{seances.length} séance{seances.length > 1 ? 's' : ''}</span>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{seances.length} séance{seances.length > 1 ? 's' : ''}</span>
               </div>
               {seances.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: '#6e6c66', fontSize: '13px' }}>
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
                   Aucune séance effectuée ce mois.
                 </div>
               ) : (
@@ -163,7 +163,7 @@ export default function ProfSalairePage() {
                           <td style={s.td}>
                             {new Date(seance.date_debut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
                           </td>
-                          <td style={{ ...s.td, color: '#e8e6e0' }}>{seance.titre}</td>
+                          <td style={{ ...s.td, color: 'var(--text)' }}>{seance.titre}</td>
                           <td style={s.td}>
                             <span style={{
                               padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500',
@@ -175,7 +175,7 @@ export default function ProfSalairePage() {
                           </td>
                           <td style={s.td}>{dureeH}h</td>
                           <td style={s.td}>{nbEleves}</td>
-                          <td style={{ ...s.td, color: '#a78bfa', fontFamily: 'monospace', fontWeight: '600' }}>
+                          <td style={{ ...s.td, color: 'var(--purple)', fontFamily: 'monospace', fontWeight: '600' }}>
                             {montant.toFixed(2)}€
                           </td>
                         </tr>
@@ -191,7 +191,7 @@ export default function ProfSalairePage() {
               <div style={s.card}>
                 <div style={s.cardHeader}>
                   <span style={s.cardTitle}>Versements reçus</span>
-                  <span style={{ fontSize: '11px', color: '#6e6c66' }}>{versements.length} versement{versements.length > 1 ? 's' : ''}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{versements.length} versement{versements.length > 1 ? 's' : ''}</span>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
@@ -205,14 +205,14 @@ export default function ProfSalairePage() {
                         <td style={s.td}>
                           {new Date(v.date_versement).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
                         </td>
-                        <td style={{ ...s.td, color: '#34d399', fontFamily: 'monospace', fontWeight: '600' }}>
+                        <td style={{ ...s.td, color: 'var(--teal)', fontFamily: 'monospace', fontWeight: '600' }}>
                           +{v.montant_verse}€
                         </td>
                         <td style={s.td}>
                           <span style={{
                             padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500',
                             background: v.statut === 'solde' ? 'rgba(52,211,153,0.12)' : 'rgba(251,191,36,0.1)',
-                            color: v.statut === 'solde' ? '#34d399' : '#fbbf24'
+                            color: v.statut === 'solde' ? 'var(--teal)' : 'var(--amber)'
                           }}>
                             {v.statut === 'solde' ? 'Soldé' : 'Partiel'}
                           </span>
@@ -234,14 +234,14 @@ export default function ProfSalairePage() {
                     { label: 'Cours individuel', value: `${bareme.tarif_cours_solo}€/h` },
                     { label: 'Cours collectif', value: `${bareme.tarif_cours_groupe}€/h` },
                   ].map(item => (
-                    <div key={item.label} style={{ background: '#1e1e24', borderRadius: '8px', padding: '12px 14px' }}>
-                      <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '4px' }}>{item.label}</div>
-                      <div style={{ fontSize: '16px', fontWeight: '600', fontFamily: 'monospace', color: '#e8e6e0' }}>{item.value}</div>
+                    <div key={item.label} style={{ background: 'var(--surface2)', borderRadius: '8px', padding: '12px 14px' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '4px' }}>{item.label}</div>
+                      <div style={{ fontSize: '16px', fontWeight: '600', fontFamily: 'monospace', color: 'var(--text)' }}>{item.value}</div>
                     </div>
                   ))}
                 </div>
                 {bareme.tarif_par_eleve && (
-                  <div style={{ fontSize: '12px', color: '#6e6c66', marginTop: '12px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '12px' }}>
                     + {bareme.tarif_par_eleve}€/élève/h au-delà de {bareme.seuil_eleves} élèves
                   </div>
                 )}

@@ -72,42 +72,42 @@ export default function AdminDashboard() {
   }
 
   const TYPES = {
-    cours: { label: 'Cours', color: '#a78bfa' },
-    kholle: { label: 'Khôlle', color: '#34d399' },
-    entretien: { label: 'Entretien', color: '#f87171' }
+    cours: { label: 'Cours', color: 'var(--purple)' },
+    kholle: { label: 'Khôlle', color: 'var(--teal)' },
+    entretien: { label: 'Entretien', color: 'var(--coral)' }
   }
 
   const totalAlertes = alertes.abosExpirent.length + alertes.abosEnAttente.length + alertes.seancesNonPointees.length
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
+    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
     content: { padding: '24px 28px' },
-    statCard: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '16px' },
-    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '13px', fontWeight: '600', color: '#e8e6e0' },
+    statCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px' },
+    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
+    cardHeader: { padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    cardTitle: { fontSize: '13px', fontWeight: '600', color: 'var(--text)' },
     cardBody: { padding: '16px 20px' },
     alerte: { display: 'flex', gap: '10px', padding: '10px 14px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start' },
-    alerteAmber: { background: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.2)' },
-    alerteCoral: { display: 'flex', gap: '10px', padding: '10px 14px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start', background: 'rgba(248,113,113,0.1)', color: '#f87171', border: '1px solid rgba(248,113,113,0.2)' },
+    alerteAmber: { background: 'rgba(251,191,36,0.1)', color: 'var(--amber)', border: '1px solid rgba(251,191,36,0.2)' },
+    alerteCoral: { display: 'flex', gap: '10px', padding: '10px 14px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start', background: 'rgba(248,113,113,0.1)', color: 'var(--coral)', border: '1px solid rgba(248,113,113,0.2)' },
     seanceItem: { display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' },
     stripe: { width: '3px', borderRadius: '2px', alignSelf: 'stretch', minHeight: '36px', flexShrink: 0 },
-    progressBar: { height: '6px', background: 'rgba(255,255,255,0.07)', borderRadius: '3px', overflow: 'hidden', marginTop: '8px' },
+    progressBar: { height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden', marginTop: '8px' },
   }
 
   if (loading) return (
-    <div style={{ padding: '40px', color: '#6e6c66', textAlign: 'center' }}>Chargement…</div>
+    <div style={{ padding: '40px', color: 'var(--muted)', textAlign: 'center' }}>Chargement…</div>
   )
 
   const now = new Date()
   const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
 
   return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <h1 style={s.title}>Tableau de bord</h1>
-        <span style={{ fontSize: '12px', color: '#6e6c66', textTransform: 'capitalize' }}>{dateStr}</span>
+        <span style={{ fontSize: '12px', color: 'var(--muted)', textTransform: 'capitalize' }}>{dateStr}</span>
       </div>
 
       <div style={s.content}>
@@ -115,30 +115,30 @@ export default function AdminDashboard() {
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', marginBottom: '20px' }}>
           <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '8px' }}>Élèves actifs</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: '#a78bfa' }}>{stats.elevesActifs}</div>
-            <div style={{ fontSize: '11px', color: stats.elevesAttente > 0 ? '#fbbf24' : '#6e6c66', marginTop: '4px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Élèves actifs</div>
+            <div style={{ fontSize: '26px', fontWeight: '600', color: 'var(--purple)' }}>{stats.elevesActifs}</div>
+            <div style={{ fontSize: '11px', color: stats.elevesAttente > 0 ? 'var(--amber)' : 'var(--muted)', marginTop: '4px' }}>
               {stats.elevesAttente > 0 ? `⚠ ${stats.elevesAttente} en attente de paiement` : 'Tous à jour'}
             </div>
           </div>
           <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '8px' }}>Séances ce mois</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: '#34d399' }}>{stats.seancesMois}</div>
-            <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '4px' }}>{stats.seancesRestantes} restantes</div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Séances ce mois</div>
+            <div style={{ fontSize: '26px', fontWeight: '600', color: 'var(--teal)' }}>{stats.seancesMois}</div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>{stats.seancesRestantes} restantes</div>
           </div>
           <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '8px' }}>Salaires à verser</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: stats.salairesAVerser > 0 ? '#fbbf24' : '#34d399' }}>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Salaires à verser</div>
+            <div style={{ fontSize: '26px', fontWeight: '600', color: stats.salairesAVerser > 0 ? 'var(--amber)' : 'var(--teal)' }}>
               {stats.salairesAVerser > 0 ? `${stats.salairesAVerser.toFixed(0)}€` : '✓ Soldé'}
             </div>
-            <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '4px' }}>ce mois</div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>ce mois</div>
           </div>
           <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: '#6e6c66', marginBottom: '8px' }}>Paiements en attente</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: stats.paiementsAttente > 0 ? '#f87171' : '#34d399' }}>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Paiements en attente</div>
+            <div style={{ fontSize: '26px', fontWeight: '600', color: stats.paiementsAttente > 0 ? 'var(--coral)' : 'var(--teal)' }}>
               {stats.paiementsAttente > 0 ? `${stats.paiementsAttente.toFixed(0)}€` : '✓'}
             </div>
-            <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '4px' }}>{alertes.abosEnAttente.length + (stats.elevesAttente - alertes.abosEnAttente.length)} élève{stats.elevesAttente > 1 ? 's' : ''}</div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>{alertes.abosEnAttente.length + (stats.elevesAttente - alertes.abosEnAttente.length)} élève{stats.elevesAttente > 1 ? 's' : ''}</div>
           </div>
         </div>
 
@@ -149,14 +149,14 @@ export default function AdminDashboard() {
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Alertes</span>
               {totalAlertes > 0 && (
-                <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(248,113,113,0.1)', color: '#f87171' }}>
+                <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(248,113,113,0.1)', color: 'var(--coral)' }}>
                   {totalAlertes}
                 </span>
               )}
             </div>
             <div style={s.cardBody}>
               {totalAlertes === 0 ? (
-                <div style={{ color: '#6e6c66', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ color: 'var(--muted)', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
                   ✓ Aucune alerte — tout est en ordre
                 </div>
               ) : (
@@ -188,11 +188,11 @@ export default function AdminDashboard() {
           <div style={s.card}>
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Prochaines séances</span>
-              <Link href="/admin/planning" style={{ fontSize: '11px', color: '#a78bfa', textDecoration: 'none' }}>Voir tout →</Link>
+              <Link href="/admin/planning" style={{ fontSize: '11px', color: 'var(--purple)', textDecoration: 'none' }}>Voir tout →</Link>
             </div>
             <div style={s.cardBody}>
               {prochainesSeances.length === 0 ? (
-                <div style={{ color: '#6e6c66', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ color: 'var(--muted)', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
                   Aucune séance à venir.
                 </div>
               ) : (
@@ -200,8 +200,8 @@ export default function AdminDashboard() {
                   <div key={seance.id} style={{ ...s.seanceItem }}>
                     <div style={{ ...s.stripe, background: TYPES[seance.type]?.color }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: '500', color: '#e8e6e0', marginBottom: '2px' }}>{seance.titre}</div>
-                      <div style={{ fontSize: '11px', color: '#6e6c66' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text)', marginBottom: '2px' }}>{seance.titre}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
                         {new Date(seance.date_debut).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}
                         {' · '}
                         {new Date(seance.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -222,37 +222,37 @@ export default function AdminDashboard() {
         <div style={s.card}>
           <div style={s.cardHeader}><span style={s.cardTitle}>Aperçu financier global</span></div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0' }}>
-            <div style={{ padding: '20px', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
-              <div style={{ fontSize: '12px', color: '#6e6c66', marginBottom: '12px' }}>Recettes élèves</div>
+            <div style={{ padding: '20px', borderRight: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '12px' }}>Recettes élèves</div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', color: '#9e9c96' }}>Reçu</span>
-                <span style={{ fontFamily: 'monospace', color: '#34d399', fontWeight: '600' }}>{financier.recettesRecues.toFixed(0)}€</span>
+                <span style={{ fontSize: '13px', color: 'var(--muted2)' }}>Reçu</span>
+                <span style={{ fontFamily: 'monospace', color: 'var(--teal)', fontWeight: '600' }}>{financier.recettesRecues.toFixed(0)}€</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: '#9e9c96' }}>Total attendu</span>
-                <span style={{ fontFamily: 'monospace', color: '#e8e6e0' }}>{financier.recettesAttendues.toFixed(0)}€</span>
+                <span style={{ fontSize: '13px', color: 'var(--muted2)' }}>Total attendu</span>
+                <span style={{ fontFamily: 'monospace', color: 'var(--text)' }}>{financier.recettesAttendues.toFixed(0)}€</span>
               </div>
               <div style={s.progressBar}>
-                <div style={{ height: '100%', borderRadius: '3px', background: '#34d399', width: `${financier.recettesAttendues > 0 ? Math.min((financier.recettesRecues / financier.recettesAttendues) * 100, 100) : 0}%`, transition: 'width 0.5s' }} />
+                <div style={{ height: '100%', borderRadius: '3px', background: 'var(--teal)', width: `${financier.recettesAttendues > 0 ? Math.min((financier.recettesRecues / financier.recettesAttendues) * 100, 100) : 0}%`, transition: 'width 0.5s' }} />
               </div>
-              <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '6px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px' }}>
                 {financier.recettesAttendues > 0 ? `${Math.round((financier.recettesRecues / financier.recettesAttendues) * 100)}% collecté` : '—'}
               </div>
             </div>
             <div style={{ padding: '20px' }}>
-              <div style={{ fontSize: '12px', color: '#6e6c66', marginBottom: '12px' }}>Charges profs</div>
+              <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '12px' }}>Charges profs</div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', color: '#9e9c96' }}>Versé</span>
-                <span style={{ fontFamily: 'monospace', color: '#34d399', fontWeight: '600' }}>{financier.chargesVersees.toFixed(0)}€</span>
+                <span style={{ fontSize: '13px', color: 'var(--muted2)' }}>Versé</span>
+                <span style={{ fontFamily: 'monospace', color: 'var(--teal)', fontWeight: '600' }}>{financier.chargesVersees.toFixed(0)}€</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: '#9e9c96' }}>Total dû</span>
-                <span style={{ fontFamily: 'monospace', color: '#e8e6e0' }}>{financier.chargesDues.toFixed(0)}€</span>
+                <span style={{ fontSize: '13px', color: 'var(--muted2)' }}>Total dû</span>
+                <span style={{ fontFamily: 'monospace', color: 'var(--text)' }}>{financier.chargesDues.toFixed(0)}€</span>
               </div>
               <div style={s.progressBar}>
-                <div style={{ height: '100%', borderRadius: '3px', background: '#a78bfa', width: `${financier.chargesDues > 0 ? Math.min((financier.chargesVersees / financier.chargesDues) * 100, 100) : 0}%`, transition: 'width 0.5s' }} />
+                <div style={{ height: '100%', borderRadius: '3px', background: 'var(--purple)', width: `${financier.chargesDues > 0 ? Math.min((financier.chargesVersees / financier.chargesDues) * 100, 100) : 0}%`, transition: 'width 0.5s' }} />
               </div>
-              <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '6px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px' }}>
                 {financier.chargesDues > 0 ? `${Math.round((financier.chargesVersees / financier.chargesDues) * 100)}% versé` : '—'}
               </div>
             </div>

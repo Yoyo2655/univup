@@ -49,21 +49,21 @@ export default function ProfsPage() {
   }
 
   const s = {
-    page: { color: '#e8e6e0' },
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    page: { color: 'var(--text)' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
+    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
     btn: { padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
-    btnPrimary: { background: '#34d399', color: '#0d1f18' },
-    btnGhost: { background: 'rgba(255,255,255,0.06)', color: '#9e9c96', border: '1px solid rgba(255,255,255,0.07)' },
+    btnPrimary: { background: 'var(--teal)', color: '#0d1f18' },
+    btnGhost: { background: 'rgba(255,255,255,0.06)', color: 'var(--muted2)', border: '1px solid var(--border)' },
     content: { padding: '24px 28px' },
-    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden' },
+    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' },
     table: { width: '100%', borderCollapse: 'collapse' },
-    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#9e9c96' },
+    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid var(--border)' },
+    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: 'var(--muted2)' },
     modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 },
-    modalBox: { background: '#18181c', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px' },
-    label: { display: 'block', fontSize: '12px', color: '#9e9c96', marginBottom: '6px' },
-    input: { width: '100%', padding: '9px 12px', background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#e8e6e0', fontSize: '13px', outline: 'none', boxSizing: 'border-box', marginBottom: '14px' },
+    modalBox: { background: 'var(--surface)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px' },
+    label: { display: 'block', fontSize: '12px', color: 'var(--muted2)', marginBottom: '6px' },
+    input: { width: '100%', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'var(--text)', fontSize: '13px', outline: 'none', boxSizing: 'border-box', marginBottom: '14px' },
   }
 
   return (
@@ -76,9 +76,9 @@ export default function ProfsPage() {
       <div style={s.content}>
         <div style={s.card}>
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>Chargement…</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>Chargement…</div>
           ) : profs.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>
               Aucun prof pour le moment — crée le premier compte.
             </div>
           ) : (
@@ -95,14 +95,14 @@ export default function ProfsPage() {
               <tbody>
                 {profs.map(prof => (
                   <tr key={prof.id}>
-                    <td style={{...s.td, color: '#e8e6e0', fontWeight: '500'}}>{prof.full_name}</td>
+                    <td style={{...s.td, color: 'var(--text)', fontWeight: '500'}}>{prof.full_name}</td>
                     <td style={s.td}>{prof.email}</td>
                     <td style={s.td}>—</td>
                     <td style={s.td}>
                       <span style={{
                         padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500',
                         background: prof.is_active ? 'rgba(52,211,153,0.12)' : 'rgba(248,113,113,0.1)',
-                        color: prof.is_active ? '#34d399' : '#f87171'
+                        color: prof.is_active ? 'var(--teal)' : 'var(--coral)'
                       }}>
                         {prof.is_active ? 'Actif' : 'Inactif'}
                       </span>
@@ -126,7 +126,7 @@ export default function ProfsPage() {
       {showForm && (
         <div style={s.modal} onClick={() => setShowForm(false)}>
           <div style={s.modalBox} onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: '#e8e6e0', fontSize: '16px', fontWeight: '600', marginBottom: '20px' }}>
+            <h2 style={{ color: 'var(--text)', fontSize: '16px', fontWeight: '600', marginBottom: '20px' }}>
               Créer un prof
             </h2>
             <form onSubmit={createProf}>
@@ -136,7 +136,7 @@ export default function ProfsPage() {
               <input style={s.input} type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required placeholder="prof@email.com" />
               <label style={s.label}>Mot de passe provisoire</label>
               <input style={s.input} type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required placeholder="Min. 6 caractères" minLength={6} />
-              {error && <div style={{ color: '#f87171', fontSize: '12px', marginBottom: '12px' }}>{error}</div>}
+              {error && <div style={{ color: 'var(--coral)', fontSize: '12px', marginBottom: '12px' }}>{error}</div>}
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button type="button" style={{...s.btn, ...s.btnGhost}} onClick={() => setShowForm(false)}>Annuler</button>
                 <button type="submit" style={{...s.btn, ...s.btnPrimary}} disabled={saving}>

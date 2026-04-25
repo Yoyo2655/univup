@@ -38,41 +38,41 @@ export default function AbonnementPage() {
   const resteAPayer = abonnement ? parseFloat(abonnement.montant) - totalVerse : 0
 
   const STATUT = {
-    actif: { label: 'Actif', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-    en_attente: { label: 'En attente', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-    expire: { label: 'Expiré', color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
+    actif: { label: 'Actif', color: 'var(--teal)', bg: 'rgba(52,211,153,0.12)' },
+    en_attente: { label: 'En attente', color: 'var(--amber)', bg: 'rgba(251,191,36,0.1)' },
+    expire: { label: 'Expiré', color: 'var(--coral)', bg: 'rgba(248,113,113,0.1)' },
   }
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid rgba(255,255,255,0.07)' },
-    title: { fontSize: '18px', fontWeight: '600', color: '#e8e6e0' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
+    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
     content: { padding: '24px 28px' },
     grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' },
-    card: { background: '#18181c', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden' },
+    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' },
     cardBody: { padding: '20px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '13px', fontWeight: '600', color: '#e8e6e0' },
+    cardHeader: { padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    cardTitle: { fontSize: '13px', fontWeight: '600', color: 'var(--text)' },
     row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' },
-    label: { color: '#6e6c66' },
-    value: { color: '#e8e6e0', fontWeight: '500', fontFamily: 'monospace' },
-    ribBox: { background: '#1e1e24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '14px 16px', marginTop: '16px' },
+    label: { color: 'var(--muted)' },
+    value: { color: 'var(--text)', fontWeight: '500', fontFamily: 'monospace' },
+    ribBox: { background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '14px 16px', marginTop: '16px' },
   }
 
   if (loading) return (
-    <div style={{ padding: '40px', color: '#6e6c66', textAlign: 'center' }}>Chargement…</div>
+    <div style={{ padding: '40px', color: 'var(--muted)', textAlign: 'center' }}>Chargement…</div>
   )
 
   if (!abonnement) return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}><h1 style={s.title}>Mon abonnement</h1></div>
-      <div style={{ padding: '40px', textAlign: 'center', color: '#6e6c66' }}>
+      <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>
         Aucun abonnement trouvé — contacte UnivUp pour régulariser ta situation.
       </div>
     </div>
   )
 
   return (
-    <div style={{ color: '#e8e6e0' }}>
+    <div style={{ color: 'var(--text)' }}>
       <div style={s.topbar}>
         <h1 style={s.title}>Mon abonnement</h1>
         <span style={{
@@ -93,10 +93,10 @@ export default function AbonnementPage() {
               <span style={s.cardTitle}>Mon pack</span>
             </div>
             <div style={s.cardBody}>
-              <div style={{ fontSize: '22px', fontWeight: '600', color: '#a78bfa', marginBottom: '4px' }}>
+              <div style={{ fontSize: '22px', fontWeight: '600', color: 'var(--purple)', marginBottom: '4px' }}>
                 {abonnement.pack_nom}
               </div>
-              <div style={{ fontSize: '12px', color: '#6e6c66', marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '20px' }}>
                 {abonnement.date_debut && abonnement.date_fin && (
                   <>Du {new Date(abonnement.date_debut).toLocaleDateString('fr-FR')} au {new Date(abonnement.date_fin).toLocaleDateString('fr-FR')}</>
                 )}
@@ -107,11 +107,11 @@ export default function AbonnementPage() {
               </div>
               <div style={{ ...s.row }}>
                 <span style={s.label}>Déjà versé</span>
-                <span style={{ ...s.value, color: '#34d399' }}>{totalVerse.toFixed(2)}€</span>
+                <span style={{ ...s.value, color: 'var(--teal)' }}>{totalVerse.toFixed(2)}€</span>
               </div>
               <div style={{ ...s.row, borderBottom: 'none' }}>
                 <span style={s.label}>Reste à payer</span>
-                <span style={{ ...s.value, color: resteAPayer > 0 ? '#fbbf24' : '#34d399' }}>
+                <span style={{ ...s.value, color: resteAPayer > 0 ? 'var(--amber)' : 'var(--teal)' }}>
                   {resteAPayer > 0 ? `${resteAPayer.toFixed(2)}€` : '✓ Soldé'}
                 </span>
               </div>
@@ -124,25 +124,25 @@ export default function AbonnementPage() {
               <span style={s.cardTitle}>Informations de virement</span>
             </div>
             <div style={s.cardBody}>
-              <div style={{ fontSize: '12px', color: '#6e6c66', marginBottom: '16px', lineHeight: 1.6 }}>
+              <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '16px', lineHeight: 1.6 }}>
                 Pour effectuer ton paiement, réalise un virement bancaire avec les informations ci-dessous. 
-                Indique bien ta <strong style={{ color: '#e8e6e0' }}>référence unique</strong> dans le motif du virement.
+                Indique bien ta <strong style={{ color: 'var(--text)' }}>référence unique</strong> dans le motif du virement.
               </div>
               <div style={s.ribBox}>
-                <div style={{ fontSize: '10px', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+                <div style={{ fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
                   Référence à indiquer
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: '600', color: '#a78bfa', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--purple)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
                   {abonnement.reference_virement || '—'}
                 </div>
               </div>
               <div style={{ ...s.ribBox, marginTop: '10px' }}>
-                <div style={{ fontSize: '10px', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+                <div style={{ fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
                   Bénéficiaire
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: '500', color: '#e8e6e0' }}>UnivUp</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text)' }}>UnivUp</div>
               </div>
-              <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '12px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '12px' }}>
                 Une fois le virement reçu, ton accès sera activé sous 24h.
               </div>
             </div>
@@ -153,10 +153,10 @@ export default function AbonnementPage() {
         <div style={s.card}>
           <div style={s.cardHeader}>
             <span style={s.cardTitle}>Historique des paiements</span>
-            <span style={{ fontSize: '11px', color: '#6e6c66' }}>{paiements.length} virement{paiements.length > 1 ? 's' : ''}</span>
+            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{paiements.length} virement{paiements.length > 1 ? 's' : ''}</span>
           </div>
           {paiements.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', color: '#6e6c66', fontSize: '13px' }}>
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
               Aucun paiement enregistré pour le moment.
             </div>
           ) : (
@@ -164,7 +164,7 @@ export default function AbonnementPage() {
               <thead>
                 <tr>
                   {['Date', 'Montant', 'Statut'].map(h => (
-                    <th key={h} style={{ textAlign: 'left', fontSize: '10px', fontWeight: '500', color: '#6e6c66', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                    <th key={h} style={{ textAlign: 'left', fontSize: '10px', fontWeight: '500', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 20px', borderBottom: '1px solid var(--border)' }}>
                       {h}
                     </th>
                   ))}
@@ -173,14 +173,14 @@ export default function AbonnementPage() {
               <tbody>
                 {paiements.map(p => (
                   <tr key={p.id}>
-                    <td style={{ padding: '12px 20px', fontSize: '13px', color: '#9e9c96', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '12px 20px', fontSize: '13px', color: 'var(--muted2)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                       {new Date(p.date_virement).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </td>
-                    <td style={{ padding: '12px 20px', fontSize: '13px', fontWeight: '600', color: '#34d399', fontFamily: 'monospace', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '12px 20px', fontSize: '13px', fontWeight: '600', color: 'var(--teal)', fontFamily: 'monospace', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                       +{p.montant}€
                     </td>
                     <td style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(52,211,153,0.12)', color: '#34d399' }}>
+                      <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(52,211,153,0.12)', color: 'var(--teal)' }}>
                         Reçu ✓
                       </span>
                     </td>

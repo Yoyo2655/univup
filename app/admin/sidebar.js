@@ -21,15 +21,15 @@ export default function AdminSidebar() {
 
   return (
     <div style={{
-      width: '220px', flexShrink: 0, background: '#18181c',
-      borderRight: '1px solid rgba(255,255,255,0.07)',
+      width: '220px', flexShrink: 0, background: 'var(--surface)',
+      borderRight: '1px solid var(--border)',
       display: 'flex', flexDirection: 'column', padding: '20px 0',
       position: 'fixed', height: '100vh'
     }}>
       {/* Logo */}
-      <div style={{ padding: '0 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: '16px' }}>
-        <div style={{ fontSize: '18px', fontWeight: '600', color: '#e8e6e0' }}>UnivUp</div>
-        <div style={{ fontSize: '11px', color: '#6e6c66', marginTop: '2px' }}>Espace admin</div>
+      <div style={{ padding: '0 20px 20px', borderBottom: '1px solid var(--border)', marginBottom: '16px' }}>
+        <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text)' }}>UnivUp</div>
+        <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>Espace admin</div>
       </div>
 
       {/* Nav */}
@@ -39,8 +39,8 @@ export default function AdminSidebar() {
             <div style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               padding: '8px 10px', borderRadius: '8px', marginBottom: '2px',
-              background: pathname === item.href ? '#1e1e24' : 'none',
-              color: pathname === item.href ? '#e8e6e0' : '#6e6c66',
+              background: pathname === item.href ? 'var(--surface2)' : 'none',
+              color: pathname === item.href ? 'var(--text)' : 'var(--muted)',
               fontSize: '13px', cursor: 'pointer'
             }}>
               <span>{item.icon}</span>
@@ -51,25 +51,25 @@ export default function AdminSidebar() {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '16px 12px 0', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+      <div style={{ padding: '16px 12px 0', borderTop: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px' }}>
           <div style={{
             width: '28px', height: '28px', borderRadius: '50%',
-            background: 'rgba(167,139,250,0.12)', color: '#a78bfa',
+            background: 'rgba(167,139,250,0.12)', color: 'var(--purple)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '11px', fontWeight: '600'
           }}>YO</div>
           <div>
-            <div style={{ fontSize: '12px', fontWeight: '500', color: '#e8e6e0' }}>Yoyo</div>
-            <div style={{ fontSize: '10px', color: '#6e6c66' }}>Administrateur</div>
+            <div style={{ fontSize: '12px', fontWeight: '500', color: 'var(--text)' }}>Yoyo</div>
+            <div style={{ fontSize: '10px', color: 'var(--muted)' }}>Administrateur</div>
           </div>
         </div>
         <button
           onClick={handleLogout}
           style={{
             width: '100%', padding: '7px', marginTop: '8px',
-            background: 'none', border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: '8px', color: '#6e6c66', fontSize: '12px', cursor: 'pointer'
+            background: 'none', border: '1px solid var(--border)',
+            borderRadius: '8px', color: 'var(--muted)', fontSize: '12px', cursor: 'pointer'
           }}
         >
           Se déconnecter
