@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { t } from '../../../lib/theme'
 
 export default function ResultatsPage() {
   const [resultats, setResultats] = useState([])
@@ -34,43 +35,43 @@ export default function ResultatsPage() {
     : null
 
   const TYPES = {
-    cours: { label: 'Cours', color: 'var(--purple)' },
-    kholle: { label: 'Khôlle', color: 'var(--teal)' },
-    entretien: { label: 'Entretien', color: 'var(--coral)' }
+    cours: { label: 'Cours', color: t.purple },
+    kholle: { label: 'Khôlle', color: t.teal },
+    entretien: { label: 'Entretien', color: t.coral }
   }
 
   const PRESENCE = {
-    present: { label: 'Présent', color: 'var(--teal)', bg: 'rgba(52,211,153,0.12)' },
-    absent: { label: 'Absent', color: 'var(--coral)', bg: 'rgba(248,113,113,0.1)' },
-    retard: { label: 'Retard', color: 'var(--amber)', bg: 'rgba(251,191,36,0.1)' },
+    present: { label: 'Présent', color: t.teal, bg: 'rgba(52,211,153,0.12)' },
+    absent: { label: 'Absent', color: t.coral, bg: 'rgba(248,113,113,0.1)' },
+    retard: { label: 'Retard', color: t.amber, bg: 'rgba(251,191,36,0.1)' },
   }
 
   function noteColor(note) {
-    if (note >= 14) return 'var(--teal)'
-    if (note >= 10) return 'var(--amber)'
-    return 'var(--coral)'
+    if (note >= 14) return t.teal
+    if (note >= 10) return t.amber
+    return t.coral
   }
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid var(--border)' },
-    title: { fontSize: '18px', fontWeight: '600', color: 'var(--text)' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid t.border' },
+    title: { fontSize: '18px', fontWeight: '600', color: t.text },
     content: { padding: '24px 28px' },
-    statCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px' },
-    card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', marginBottom: '10px' },
+    statCard: { background: t.surface, border: '1px solid t.border', borderRadius: '12px', padding: '16px' },
+    card: { background: t.surface, border: '1px solid t.border', borderRadius: '12px', overflow: 'hidden', marginBottom: '10px' },
   }
 
   return (
-    <div style={{ color: 'var(--text)' }}>
+    <div style={{ color: t.text }}>
       <div style={s.topbar}>
         <h1 style={s.title}>Mes résultats</h1>
-        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{resultats.length} séance{resultats.length > 1 ? 's' : ''} au total</span>
+        <span style={{ fontSize: '12px', color: t.muted }}>{resultats.length} séance{resultats.length > 1 ? 's' : ''} au total</span>
       </div>
 
       <div style={s.content}>
         {loading ? (
-          <div style={{ color: 'var(--muted)', textAlign: 'center', padding: '40px' }}>Chargement…</div>
+          <div style={{ color: t.muted, textAlign: 'center', padding: '40px' }}>Chargement…</div>
         ) : resultats.length === 0 ? (
-          <div style={{ color: 'var(--muted)', textAlign: 'center', padding: '40px' }}>
+          <div style={{ color: t.muted, textAlign: 'center', padding: '40px' }}>
             Aucun résultat pour le moment.
           </div>
         ) : (
@@ -78,28 +79,28 @@ export default function ResultatsPage() {
             {/* Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '24px' }}>
               <div style={s.statCard}>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Moyenne khôlles</div>
-                <div style={{ fontSize: '28px', fontWeight: '600', color: moyenne ? noteColor(parseFloat(moyenne)) : 'var(--muted)' }}>
+                <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Moyenne khôlles</div>
+                <div style={{ fontSize: '28px', fontWeight: '600', color: moyenne ? noteColor(parseFloat(moyenne)) : t.muted }}>
                   {moyenne ? `${moyenne}/20` : '—'}
                 </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>{notes.length} note{notes.length > 1 ? 's' : ''}</div>
+                <div style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>{notes.length} note{notes.length > 1 ? 's' : ''}</div>
               </div>
               <div style={s.statCard}>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Taux de présence</div>
-                <div style={{ fontSize: '28px', fontWeight: '600', color: tauxPresence >= 80 ? 'var(--teal)' : 'var(--amber)' }}>
+                <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Taux de présence</div>
+                <div style={{ fontSize: '28px', fontWeight: '600', color: tauxPresence >= 80 ? t.teal : t.amber }}>
                   {tauxPresence !== null ? `${tauxPresence}%` : '—'}
                 </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>{presents} présent · {absents} absent</div>
+                <div style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>{presents} présent · {absents} absent</div>
               </div>
               <div style={s.statCard}>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '8px' }}>Séances suivies</div>
-                <div style={{ fontSize: '28px', fontWeight: '600', color: 'var(--purple)' }}>{presents}</div>
-                <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>sur {resultats.length} planifiées</div>
+                <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Séances suivies</div>
+                <div style={{ fontSize: '28px', fontWeight: '600', color: t.purple }}>{presents}</div>
+                <div style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>sur {resultats.length} planifiées</div>
               </div>
             </div>
 
             {/* Historique */}
-            <div style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+            <div style={{ fontSize: '11px', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
               Historique
             </div>
             {resultats.map(r => (
@@ -107,21 +108,21 @@ export default function ResultatsPage() {
                 <div style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
                   {/* Date */}
                   <div style={{ minWidth: '52px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text)', lineHeight: 1 }}>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: t.text, lineHeight: 1 }}>
                       {new Date(r.seance?.date_debut).toLocaleDateString('fr-FR', { day: '2-digit' })}
                     </div>
-                    <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>
+                    <div style={{ fontSize: '10px', color: t.muted, marginTop: '2px' }}>
                       {new Date(r.seance?.date_debut).toLocaleDateString('fr-FR', { month: 'short' })}
                     </div>
                   </div>
 
                   {/* Séparateur */}
-                  <div style={{ width: '1px', background: 'var(--border)', alignSelf: 'stretch' }} />
+                  <div style={{ width: '1px', background: t.border, alignSelf: 'stretch' }} />
 
                   {/* Info séance */}
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '3px' }}>{r.seance?.titre}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    <div style={{ fontSize: '11px', color: t.muted }}>
                       {r.seance?.matiere && `${r.seance.matiere} · `}
                       {r.seance?.prof?.full_name && `Prof. ${r.seance.prof.full_name}`}
                     </div>
@@ -161,7 +162,7 @@ export default function ResultatsPage() {
                   <div style={{
                     padding: '10px 20px 14px',
                     borderTop: '1px solid rgba(255,255,255,0.05)',
-                    fontSize: '12px', color: 'var(--muted2)', fontStyle: 'italic',
+                    fontSize: '12px', color: t.muted2, fontStyle: 'italic',
                     display: 'flex', gap: '8px', alignItems: 'flex-start'
                   }}>
                     <span style={{ fontSize: '14px', flexShrink: 0 }}>💬</span>

@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
+import { t } from '../lib/theme'
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -38,22 +40,22 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', background: 'var(--bg)', fontFamily: 'system-ui, sans-serif'
+      justifyContent: 'center', background: t.bg, fontFamily: 'system-ui, sans-serif'
     }}>
       <div style={{
-        background: 'var(--surface)', border: '1px solid var(--border)',
+        background: t.surface, border: '1px solid t.border',
         borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '400px'
       }}>
         <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ color: 'var(--text)', fontSize: '24px', fontWeight: '600', marginBottom: '6px' }}>
+          <h1 style={{ color: t.text, fontSize: '24px', fontWeight: '600', marginBottom: '6px' }}>
             UnivUp
           </h1>
-          <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Connecte-toi à ton espace</p>
+          <p style={{ color: t.muted, fontSize: '14px' }}>Connecte-toi à ton espace</p>
         </div>
 
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: 'var(--muted2)', fontSize: '12px', marginBottom: '6px' }}>
+            <label style={{ display: 'block', color: t.muted2, fontSize: '12px', marginBottom: '6px' }}>
               Email
             </label>
             <input
@@ -62,15 +64,15 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               required
               style={{
-                width: '100%', padding: '10px 14px', background: 'var(--surface2)',
+                width: '100%', padding: '10px 14px', background: t.surface2,
                 border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
-                color: 'var(--text)', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
+                color: t.text, fontSize: '14px', outline: 'none', boxSizing: 'border-box'
               }}
             />
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', color: 'var(--muted2)', fontSize: '12px', marginBottom: '6px' }}>
+            <label style={{ display: 'block', color: t.muted2, fontSize: '12px', marginBottom: '6px' }}>
               Mot de passe
             </label>
             <input
@@ -79,9 +81,9 @@ export default function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               required
               style={{
-                width: '100%', padding: '10px 14px', background: 'var(--surface2)',
+                width: '100%', padding: '10px 14px', background: t.surface2,
                 border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
-                color: 'var(--text)', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
+                color: t.text, fontSize: '14px', outline: 'none', boxSizing: 'border-box'
               }}
             />
           </div>
@@ -89,7 +91,7 @@ export default function LoginPage() {
           {error && (
             <div style={{
               background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)',
-              borderRadius: '8px', padding: '10px 14px', color: 'var(--coral)',
+              borderRadius: '8px', padding: '10px 14px', color: t.coral,
               fontSize: '13px', marginBottom: '16px'
             }}>
               {error}
@@ -100,7 +102,7 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             style={{
-              width: '100%', padding: '11px', background: 'var(--purple)',
+              width: '100%', padding: '11px', background: t.purple,
               border: 'none', borderRadius: '8px', color: '#1a1228',
               fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: loading ? 0.7 : 1
             }}

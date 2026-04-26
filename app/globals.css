@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --bg: var(--bg);
-  --surface: var(--surface);
-  --surface2: var(--surface2);
-  --text: var(--text);
-  --muted: var(--muted);
-  --muted2: var(--muted2);
-  --purple: var(--purple);
-  --teal: var(--teal);
-  --blue: var(--blue);
-  --amber: var(--amber);
-  --coral: var(--coral);
-  --border: var(--border);
-  --border2: var(--border2);
+  --bg: t.bg;
+  --surface: t.surface;
+  --surface2: t.surface2;
+  --text: t.text;
+  --muted: t.muted;
+  --muted2: t.muted2;
+  --purple: t.purple;
+  --teal: t.teal;
+  --blue: t.blue;
+  --amber: t.amber;
+  --coral: t.coral;
+  --border: t.border;
+  --border2: t.border2;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: t.bg;
+  color: t.text;
   font-family: system-ui, sans-serif;
 }
