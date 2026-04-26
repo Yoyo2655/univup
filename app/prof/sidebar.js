@@ -1,6 +1,7 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '../../lib/supabase'
 import { useEffect, useState } from 'react'
 import { t } from '../../lib/theme'
@@ -40,11 +41,19 @@ export default function ProfSidebar() {
       display: 'flex', flexDirection: 'column', padding: '20px 0',
       position: 'fixed', height: '100vh'
     }}>
+      {/* Logo */}
       <div style={{ padding: '0 20px 20px', borderBottom: '1px solid t.border', marginBottom: '16px' }}>
-        <div style={{ fontSize: '18px', fontWeight: '600', color: t.text }}>UnivUp</div>
-        <div style={{ fontSize: '11px', color: t.muted, marginTop: '2px' }}>Espace professeur</div>
+        <Image
+          src="/Logo1w_univup-removebg.png"
+          alt="UnivUp"
+          width={120}
+          height={40}
+          style={{ objectFit: 'contain' }}
+        />
+        <div style={{ fontSize: '13px', color: t.muted, marginTop: '2px', marginLeft: '10px' }}>Espace professeur</div>
       </div>
 
+      {/* Nav */}
       <div style={{ padding: '0 12px', flex: 1 }}>
         {navItems.map(item => (
           <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
@@ -62,6 +71,7 @@ export default function ProfSidebar() {
         ))}
       </div>
 
+      {/* Footer */}
       <div style={{ padding: '16px 12px 0', borderTop: '1px solid t.border' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px' }}>
           <div style={{

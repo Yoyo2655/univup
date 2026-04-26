@@ -1,12 +1,12 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '../../lib/supabase'
 import { t } from '../../lib/theme'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
-
   const navItems = [
     { href: '/admin', label: 'Tableau de bord', icon: '⊞' },
     { href: '/admin/planning', label: 'Planning global', icon: '📅' },
@@ -31,8 +31,14 @@ export default function AdminSidebar() {
     }}>
       {/* Logo */}
       <div style={{ padding: '0 20px 20px', borderBottom: '1px solid t.border', marginBottom: '16px' }}>
-        <div style={{ fontSize: '18px', fontWeight: '600', color: t.text }}>UnivUp</div>
-        <div style={{ fontSize: '11px', color: t.muted, marginTop: '2px' }}>Espace admin</div>
+        <Image
+          src="/Logo1w_univup-removebg.png"
+          alt="UnivUp"
+          width={120}
+          height={40}
+          style={{ objectFit: 'contain' }}
+        />
+        <div style={{ fontSize: '13px', color: t.muted, marginTop: '2px', marginLeft: '10px' }}>Espace admin</div>
       </div>
 
       {/* Nav */}
