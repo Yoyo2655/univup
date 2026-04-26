@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../../../lib/supabase'
 import { t } from '../../../lib/theme'
 import AccesProtege from '../AccesProtege'
 
@@ -7,7 +8,7 @@ const MATIERES = ['Maths', 'Physique', 'Proba', 'Info']
 
 export default function GeiPage() {
   const [matiere, setMatiere] = useState('Maths')
-  const [nbQuestions, setNbQuestions] = useState(10)
+  const [nbQuestions] = useState(5)
   const [mode, setMode] = useState(null)
   const [questions, setQuestions] = useState([])
   const [current, setCurrent] = useState(0)
@@ -15,6 +16,32 @@ export default function GeiPage() {
   const [valide, setValide] = useState(false)
   const [scores, setScores] = useState([])
   const [error, setError] = useState('')
+  const [sessions, setSessions] = useState([])
+  const [loadingSessions, setLoadingSessions] = useState(true)
+  const [showHistorique, setShowHistorique] = useState(false)
+  const [userId, setUserId] = useState(null)
+
+  useEffect(() => {
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      setUserId(user.id)
+      fetchSessions(user.id)
+    }
+    init()
+  }, [])
+
+  async function fetchSessions(uid) {
+    setLoadingSessions(true)
+    const { data } = await supabase
+      .from('gei_sessions')
+      .select('*')
+      .eq('eleve_id', uid)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    setSessions(data || [])
+    setLoadingSessions(false)
+  }
 
   async function startSession() {
     setMode('loading')
@@ -36,6 +63,20 @@ export default function GeiPage() {
     setMode('session')
   }
 
+  async function saveSession(finalScores, finalSelections) {
+    if (!userId) return
+    const score = finalScores.filter(Boolean).length
+    await supabase.from('gei_sessions').insert({
+      eleve_id: userId,
+      matiere,
+      nb_questions: questions.length,
+      score,
+      questions,
+      reponses: finalSelections
+    })
+    fetchSessions(userId)
+  }
+
   function toggleSelection(idx) {
     if (valide) return
     setSelections(prev => {
@@ -52,13 +93,16 @@ export default function GeiPage() {
     const sel = selections[current] || []
     const bonnes = q.bonnes_reponses
     const correct = bonnes.length === sel.length && bonnes.every(b => sel.includes(b))
-    setScores(prev => [...prev, correct])
+    const newScores = [...scores, correct]
+    setScores(newScores)
     setValide(true)
   }
 
   function next() {
     setValide(false)
     if (current + 1 >= questions.length) {
+      const finalScores = [...scores]
+      saveSession(finalScores, selections)
       setMode('results')
     } else {
       setCurrent(current + 1)
@@ -76,6 +120,12 @@ export default function GeiPage() {
 
   const totalScore = scores.filter(Boolean).length
 
+  function scoreColor(score, total) {
+    if (score >= total * 0.7) return t.teal
+    if (score >= total * 0.5) return t.amber
+    return t.coral
+  }
+
   const s = {
     topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid ' + t.border },
     title: { fontSize: '18px', fontWeight: '600', color: t.text },
@@ -83,6 +133,7 @@ export default function GeiPage() {
     card: { background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', padding: '24px', marginBottom: '16px' },
     btn: { padding: '9px 18px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
     btnPrimary: { background: t.purple, color: '#1a1228' },
+    btnGhost: { background: 'none', border: '1px solid ' + t.border2, color: t.muted2 },
     chip: { padding: '6px 14px', borderRadius: '20px', fontSize: '13px', cursor: 'pointer', border: '1px solid ' + t.border2, fontWeight: '500' },
   }
 
@@ -91,12 +142,68 @@ export default function GeiPage() {
       <>
         {!mode && (
           <div style={{ color: t.text }}>
-            <div style={s.topbar}><h1 style={s.title}>Prepa GEI</h1></div>
+            <div style={s.topbar}>
+              <h1 style={s.title}>Prepa GEI</h1>
+              <button
+                onClick={() => setShowHistorique(!showHistorique)}
+                style={{ ...s.btn, ...s.btnGhost, fontSize: '12px' }}
+              >
+                {showHistorique ? 'Masquer historique' : 'Voir historique (' + sessions.length + ')'}
+              </button>
+            </div>
             <div style={s.content}>
+
+              {/* Historique */}
+              {showHistorique && (
+                <div style={{ ...s.card, marginBottom: '16px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: t.text, marginBottom: '14px' }}>Historique des sessions</div>
+                  {loadingSessions ? (
+                    <div style={{ color: t.muted, fontSize: '13px' }}>Chargement...</div>
+                  ) : sessions.length === 0 ? (
+                    <div style={{ color: t.muted, fontSize: '13px' }}>Aucune session pour le moment.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {sessions.map(session => (
+                        <div key={session.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: t.surface2, borderRadius: '8px', fontSize: '13px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: t.purple + '22', color: t.purple }}>{session.matiere}</span>
+                            <span style={{ color: t.muted }}>{new Date(session.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ color: t.muted, fontSize: '12px' }}>{session.nb_questions} questions</span>
+                            <span style={{ fontWeight: '700', fontSize: '15px', color: scoreColor(session.score, session.nb_questions) }}>
+                              {session.score}/{session.nb_questions}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Stats rapides par matière */}
+              {!showHistorique && sessions.length > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                  {MATIERES.map(mat => {
+                    const sessionsMatiere = sessions.filter(s => s.matiere === mat)
+                    if (sessionsMatiere.length === 0) return null
+                    const moy = (sessionsMatiere.reduce((sum, s) => sum + (s.score / s.nb_questions), 0) / sessionsMatiere.length * 100).toFixed(0)
+                    return (
+                      <div key={mat} style={{ background: t.surface, border: '1px solid ' + t.border, borderRadius: '10px', padding: '12px 14px' }}>
+                        <div style={{ fontSize: '11px', color: t.muted, marginBottom: '4px' }}>{mat}</div>
+                        <div style={{ fontSize: '22px', fontWeight: '700', color: scoreColor(parseInt(moy), 100) }}>{moy}%</div>
+                        <div style={{ fontSize: '10px', color: t.muted, marginTop: '2px' }}>{sessionsMatiere.length} session{sessionsMatiere.length > 1 ? 's' : ''}</div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
               <div style={s.card}>
-                <div style={{ fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Configurer une session</div>
+                <div style={{ fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Configurer une session de 5 questions</div>
                 <div style={{ fontSize: '12px', color: t.muted, marginBottom: '20px' }}>
-                  Format reel GEI — plusieurs bonnes reponses possibles par question
+                  Format réel GEI — plusieurs bonnes réponses possibles par question
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
@@ -115,26 +222,10 @@ export default function GeiPage() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '24px' }}>
-                  <div style={{ fontSize: '12px', color: t.muted, marginBottom: '10px' }}>Nombre de questions</div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {[5, 10, 20].map(n => (
-                      <div key={n} onClick={() => setNbQuestions(n)} style={{
-                        ...s.chip,
-                        background: nbQuestions === n ? t.purple : 'none',
-                        color: nbQuestions === n ? '#1a1228' : t.muted2,
-                        borderColor: nbQuestions === n ? t.purple : t.border2,
-                      }}>
-                        {n} questions
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {error && <div style={{ color: t.coral, fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
 
                 <button onClick={startSession} style={{ ...s.btn, ...s.btnPrimary, width: '100%', padding: '11px' }}>
-                  Generer avec Gemini IA
+                  Generer avec Mistral IA
                 </button>
               </div>
             </div>
@@ -146,7 +237,7 @@ export default function GeiPage() {
             <div style={s.topbar}><h1 style={s.title}>Prepa GEI</h1></div>
             <div style={{ padding: '80px', textAlign: 'center', color: t.muted }}>
               <div style={{ fontSize: '32px', marginBottom: '16px' }}>✦</div>
-              <div>Gemini genere {nbQuestions} questions de {matiere} au format GEI...</div>
+              <div>Mistral genere {nbQuestions} questions de {matiere} au format GEI...</div>
               <div style={{ fontSize: '12px', marginTop: '8px', color: t.muted }}>Cela peut prendre 10-20 secondes</div>
             </div>
           </div>
@@ -233,7 +324,7 @@ export default function GeiPage() {
             <div style={s.content}>
               <div style={s.card}>
                 <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-                  <div style={{ fontSize: '52px', fontWeight: '700', color: totalScore >= questions.length * 0.7 ? t.teal : totalScore >= questions.length * 0.5 ? t.amber : t.coral }}>
+                  <div style={{ fontSize: '52px', fontWeight: '700', color: scoreColor(totalScore, questions.length) }}>
                     {totalScore}/{questions.length}
                   </div>
                   <div style={{ fontSize: '14px', color: t.muted, marginTop: '8px' }}>
