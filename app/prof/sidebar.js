@@ -25,6 +25,7 @@ export default function ProfSidebar() {
     { href: '/prof/appel', label: 'Feuille d\'appel', icon: '✅' },
     { href: '/prof/salaire', label: 'Mon salaire', icon: '💶' },
     { href: '/prof/ressources', label: 'Ressources', icon: '📄' },
+    { href: '/chat', label: 'Chat', icon: '💬' },
   ]
 
   async function handleLogout() {

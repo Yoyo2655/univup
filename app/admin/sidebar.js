@@ -13,6 +13,7 @@ export default function AdminSidebar() {
     { href: '/admin/eleves', label: 'Élèves & abonnements', icon: '👥' },
     { href: '/admin/profs', label: 'Professeurs', icon: '🎓' },
     { href: '/admin/salaires', label: 'Salaires profs', icon: '💶' },
+    { href: '/chat', label: 'Chat', icon: '💬' },
   ]
 
   async function handleLogout() {

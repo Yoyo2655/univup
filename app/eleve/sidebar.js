@@ -26,6 +26,7 @@ export default function EleveSidebar() {
     { href: '/eleve/biblio', label: 'Bibliothèque', icon: '📄' },
     { href: '/eleve/gei', label: 'Prépa GEI', icon: '🎯' },
     { href: '/eleve/abonnement', label: 'Mon abonnement', icon: '💳' },
+    { href: '/chat', label: 'Chat', icon: '💬' },
   ]
 
   async function handleLogout() {
