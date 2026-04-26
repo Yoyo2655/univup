@@ -13,14 +13,12 @@ export default function ResultatsPage() {
   async function fetchResultats() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-
     const { data } = await supabase
       .from('seance_eleves')
       .select('*, seance:seance_id(titre, type, matiere, date_debut, prof:prof_id(full_name))')
       .eq('eleve_id', user.id)
       .not('presence', 'is', null)
       .order('seance_id', { ascending: false })
-
     setResultats(data || [])
     setLoading(false)
   }
@@ -29,6 +27,19 @@ export default function ResultatsPage() {
   const moyenne = notes.length > 0
     ? (notes.reduce((sum, r) => sum + parseFloat(r.note), 0) / notes.length).toFixed(1)
     : null
+
+  const MATIERES_KHOLLE = ['Maths', 'Physique', 'Anglais', 'Motivation', 'Info']
+  const moyennesParMatiere = MATIERES_KHOLLE.map(mat => {
+    const notesMatiere = resultats.filter(r => r.note !== null && r.seance?.type === 'kholle' && r.seance?.matiere === mat)
+    return {
+      matiere: mat,
+      moyenne: notesMatiere.length > 0
+        ? (notesMatiere.reduce((sum, r) => sum + parseFloat(r.note), 0) / notesMatiere.length).toFixed(1)
+        : null,
+      count: notesMatiere.length
+    }
+  }).filter(m => m.count > 0)
+
   const presents = resultats.filter(r => r.presence === 'present').length
   const absents = resultats.filter(r => r.presence === 'absent').length
   const tauxPresence = resultats.length > 0
@@ -78,9 +89,9 @@ export default function ResultatsPage() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginBottom: '16px' }}>
                 <div style={s.statCard}>
-                  <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Moyenne kholles</div>
+                  <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Moyenne generale kholles</div>
                   <div style={{ fontSize: '28px', fontWeight: '600', color: moyenne ? noteColor(parseFloat(moyenne)) : t.muted }}>
                     {moyenne ? moyenne + '/20' : '-'}
                   </div>
@@ -99,6 +110,25 @@ export default function ResultatsPage() {
                   <div style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>sur {resultats.length} planifiees</div>
                 </div>
               </div>
+
+              {moyennesParMatiere.length > 0 && (
+                <>
+                  <div style={{ fontSize: '11px', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+                    Moyennes par matiere
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px', marginBottom: '24px' }}>
+                    {moyennesParMatiere.map(m => (
+                      <div key={m.matiere} style={{ background: t.surface, border: '1px solid ' + t.border, borderRadius: '10px', padding: '14px' }}>
+                        <div style={{ fontSize: '11px', color: t.muted, marginBottom: '6px' }}>Kholle {m.matiere}</div>
+                        <div style={{ fontSize: '22px', fontWeight: '600', color: noteColor(parseFloat(m.moyenne)) }}>
+                          {m.moyenne}/20
+                        </div>
+                        <div style={{ fontSize: '10px', color: t.muted, marginTop: '4px' }}>{m.count} note{m.count > 1 ? 's' : ''}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <div style={{ fontSize: '11px', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
                 Historique

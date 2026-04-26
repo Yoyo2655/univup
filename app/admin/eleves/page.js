@@ -12,6 +12,7 @@ export default function ElevesPage() {
   const [paiements, setPaiements] = useState([])
   const [profil, setProfil] = useState(null)
   const [packs, setPacks] = useState([])
+  const [showChangePack, setShowChangePack] = useState(false)
   const [form, setForm] = useState({ full_name: '', email: '', password: '' })
   const [aboForm, setAboForm] = useState({ pack_nom: '', montant: '', date_debut: '', date_fin: '' })
   const [paiForm, setPaiForm] = useState({ montant: '', date_virement: '' })
@@ -111,6 +112,27 @@ export default function ElevesPage() {
     setSaving(false)
   }
 
+  async function changerPack(pack) {
+    setSaving(true)
+    const totalVerse = paiements.reduce((s, p) => s + parseFloat(p.montant), 0)
+    const nouveauMontant = parseFloat(pack.prix)
+    // Le nouveau montant du = prix du nouveau pack
+    // Ce qui reste = nouveau montant - ce qui a déjà été versé
+    await supabase.from('abonnements').update({
+      pack_nom: pack.nom,
+      montant: nouveauMontant,
+      statut: totalVerse >= nouveauMontant ? 'actif' : 'en_attente'
+    }).eq('id', abonnement.id)
+
+    if (totalVerse >= nouveauMontant) {
+      await supabase.from('users').update({ is_active: true }).eq('id', selectedEleve.id)
+    }
+
+    setShowChangePack(false)
+    setSaving(false)
+    openEleve(selectedEleve)
+  }
+
   async function addPaiement(e) {
     e.preventDefault()
     setSaving(true)
@@ -138,7 +160,7 @@ export default function ElevesPage() {
   const STATUT = {
     actif: { label: 'Actif', color: t.teal, bg: 'rgba(52,211,153,0.12)' },
     en_attente: { label: 'En attente', color: t.amber, bg: 'rgba(251,191,36,0.1)' },
-    expire: { label: 'Expiré', color: t.coral, bg: 'rgba(248,113,113,0.1)' },
+    expire: { label: 'Expire', color: t.coral, bg: 'rgba(248,113,113,0.1)' },
   }
 
   const s = {
@@ -257,23 +279,12 @@ export default function ElevesPage() {
               <div style={{ fontSize: '12px', color: t.muted }}>Profil non encore renseigne par l'eleve.</div>
             ) : (
               <>
-                <div style={s.row}>
-                  <span style={{ color: t.muted, flexShrink: 0 }}>Universite</span>
-                  <span style={{ color: t.text, fontWeight: '500', textAlign: 'right' }}>{profil.fac_origine || '-'}</span>
-                </div>
-                <div style={s.row}>
-                  <span style={{ color: t.muted, flexShrink: 0 }}>Statut</span>
-                  <span style={{ color: t.text }}>{profil.statut_etudiant || '-'}</span>
-                </div>
-                <div style={s.row}>
-                  <span style={{ color: t.muted, flexShrink: 0 }}>Annee concours</span>
-                  <span style={{ color: t.text }}>{profil.annee_concours || '-'}</span>
-                </div>
+                <div style={s.row}><span style={{ color: t.muted, flexShrink: 0 }}>Universite</span><span style={{ color: t.text, fontWeight: '500', textAlign: 'right' }}>{profil.fac_origine || '-'}</span></div>
+                <div style={s.row}><span style={{ color: t.muted, flexShrink: 0 }}>Statut</span><span style={{ color: t.text }}>{profil.statut_etudiant || '-'}</span></div>
+                <div style={s.row}><span style={{ color: t.muted, flexShrink: 0 }}>Annee concours</span><span style={{ color: t.text }}>{profil.annee_concours || '-'}</span></div>
                 <div style={s.row}>
                   <span style={{ color: t.muted, flexShrink: 0 }}>Dominante Centrale</span>
-                  <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(167,139,250,0.12)', color: t.purple }}>
-                    {profil.dominante_centrale || '-'}
-                  </span>
+                  <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(167,139,250,0.12)', color: t.purple }}>{profil.dominante_centrale || '-'}</span>
                 </div>
                 <div style={s.row}>
                   <span style={{ color: t.muted, flexShrink: 0 }}>Ecoles cibles</span>
@@ -311,7 +322,6 @@ export default function ElevesPage() {
               {!abonnement ? (
                 <form onSubmit={createAbonnement}>
                   <div style={{ color: t.muted, fontSize: '12px', marginBottom: '16px' }}>Aucun abonnement.</div>
-
                   <label style={{ ...s.label, marginTop: 0 }}>Pack</label>
                   <select
                     style={{ ...s.input, cursor: 'pointer' }}
@@ -327,16 +337,12 @@ export default function ElevesPage() {
                       <option key={p.id} value={p.nom}>{p.nom} - {p.prix}EUR</option>
                     ))}
                   </select>
-
                   <label style={s.label}>Montant total (EUR)</label>
                   <input style={s.input} type="number" value={aboForm.montant} onChange={e => setAboForm({ ...aboForm, montant: e.target.value })} required placeholder="Rempli automatiquement" />
-
                   <label style={s.label}>Date debut</label>
                   <input style={s.input} type="date" value={aboForm.date_debut} onChange={e => setAboForm({ ...aboForm, date_debut: e.target.value })} required />
-
                   <label style={s.label}>Date fin</label>
                   <input style={s.input} type="date" value={aboForm.date_fin} onChange={e => setAboForm({ ...aboForm, date_fin: e.target.value })} required />
-
                   <button type="submit" style={{ ...s.btn, ...s.btnPrimary, marginTop: '16px', width: '100%' }} disabled={saving}>
                     {saving ? 'Creation...' : "Creer l'abonnement"}
                   </button>
@@ -356,6 +362,12 @@ export default function ElevesPage() {
                     <div style={{ fontSize: '10px', color: t.muted, marginBottom: '4px' }}>Reference virement</div>
                     <div style={{ fontFamily: 'monospace', color: t.purple, fontSize: '14px' }}>{abonnement.reference_virement}</div>
                   </div>
+                  <button
+                    onClick={() => setShowChangePack(true)}
+                    style={{ ...s.btn, ...s.btnGhost, marginTop: '12px', width: '100%', fontSize: '12px' }}
+                  >
+                    Changer de pack
+                  </button>
                 </>
               )}
             </div>
@@ -393,9 +405,7 @@ export default function ElevesPage() {
             ) : (
               <table style={s.table}>
                 <thead>
-                  <tr>
-                    {['Date', 'Montant', 'Valide par'].map(h => <th key={h} style={s.th}>{h}</th>)}
-                  </tr>
+                  <tr>{['Date', 'Montant', 'Valide par'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr>
                 </thead>
                 <tbody>
                   {paiements.map(p => (
@@ -411,6 +421,50 @@ export default function ElevesPage() {
           </div>
         )}
       </div>
+
+      {/* Modale changement de pack */}
+      {showChangePack && (
+        <div style={s.modal} onClick={() => setShowChangePack(false)}>
+          <div style={{ background: t.surface, border: '1px solid ' + t.border2, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '500px', maxHeight: '80vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ color: t.text, fontSize: '16px', fontWeight: '600', marginBottom: '6px' }}>Changer de pack</h2>
+            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '6px', lineHeight: 1.6 }}>
+              Pack actuel : <strong style={{ color: t.text }}>{abonnement?.pack_nom}</strong> ({abonnement?.montant}EUR)
+            </p>
+            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
+              Deja verse : <strong style={{ color: t.teal }}>{totalVerse.toFixed(2)}EUR</strong>
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {packs.map(pack => {
+                const nouveauReste = parseFloat(pack.prix) - totalVerse
+                return (
+                  <div
+                    key={pack.id}
+                    onClick={() => changerPack(pack)}
+                    style={{ background: t.surface2, border: '1px solid ' + t.border, borderRadius: '10px', padding: '16px', cursor: 'pointer' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = t.purple}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '500', color: t.text }}>{pack.nom}</div>
+                      <div style={{ fontSize: '18px', fontWeight: '700', color: t.purple }}>{pack.prix}EUR</div>
+                    </div>
+                    <div style={{ fontSize: '12px', color: nouveauReste > 0 ? t.amber : t.teal }}>
+                      {nouveauReste > 0
+                        ? 'Reste a payer apres changement : ' + nouveauReste.toFixed(2) + 'EUR'
+                        : 'Deja paye — sera marque comme solde'}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <button onClick={() => setShowChangePack(false)} style={{ ...s.btn, ...s.btnGhost, marginTop: '16px', width: '100%' }}>
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

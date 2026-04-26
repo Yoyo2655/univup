@@ -96,8 +96,8 @@ export default function PlanningPage() {
     setSaving(false)
   }
 
-  const TYPES = { cours: { label: 'Cours', color: t.purple }, kholle: { label: 'Khôlle', color: t.teal }, entretien: { label: 'Entretien', color: t.coral } }
-  const MATIERES = ['Maths', 'Physique', 'Info', 'SI', 'Français', 'Anglais', 'Autre']
+  const TYPES = { cours: { label: 'Cours', color: t.purple }, kholle: { label: 'Khôlle', color: t.teal }}
+  const MATIERES = ['Maths', 'Physique', 'Motivation', 'Anglais', 'Info', 'Autre']
 
   const s = {
     topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid t.border' },
@@ -203,7 +203,6 @@ export default function PlanningPage() {
               <select style={s.select} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
                 <option value="cours">Cours</option>
                 <option value="kholle">Khôlle</option>
-                <option value="entretien">Entretien blanc</option>
               </select>
 
               {/* Titre + Matière */}
