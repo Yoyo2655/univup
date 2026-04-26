@@ -2,8 +2,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { t } from '../lib/theme'
-
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,7 +23,6 @@ export default function LoginPage() {
       return
     }
 
-    // Récupérer le rôle de l'utilisateur
     const { data: userData } = await supabase
       .from('users')
       .select('role')
@@ -39,77 +36,236 @@ export default function LoginPage() {
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', background: t.bg, fontFamily: 'system-ui, sans-serif'
+      minHeight: '100vh',
+      display: 'flex',
+      background: '#0e0d0d',
+      fontFamily: "'DM Sans', system-ui, sans-serif",
+      position: 'relative',
+      overflow: 'hidden',
     }}>
+
+      {/* ── Panneau gauche — branding ── */}
       <div style={{
-        background: t.surface, border: '1px solid t.border',
-        borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '400px'
+        width: '420px',
+        flexShrink: 0,
+        background: '#111010',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '52px 48px',
+        position: 'relative',
+        overflow: 'hidden',
+        borderRight: '1px solid rgba(255,255,255,0.05)',
       }}>
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ color: t.text, fontSize: '24px', fontWeight: '600', marginBottom: '6px' }}>
-            UnivUp
-          </h1>
-          <p style={{ color: t.muted, fontSize: '14px' }}>Connecte-toi à ton espace</p>
+
+        {/* Lignes signature verticales (droite du panneau) */}
+        <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'row' }}>
+          <div style={{ width: '5px', background: '#111010' }} />
+          <div style={{ width: '5px', background: '#9b8ec4' }} />
+          <div style={{ width: '5px', background: '#8a1c30' }} />
         </div>
 
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: t.muted2, fontSize: '12px', marginBottom: '6px' }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%', padding: '10px 14px', background: t.surface2,
-                border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
-                color: t.text, fontSize: '14px', outline: 'none', boxSizing: 'border-box'
-              }}
-            />
-          </div>
+        {/* Logo — absolu en haut à gauche, ne perturbe pas le layout */}
+        <img
+          src="/Logo1w_univup-removebg.png"
+          alt="UnivUp"
+          style={{
+            position: 'absolute',
+            top: '40px',
+            left: '40px',
+            width: '280px',
+            objectFit: 'contain',
+            zIndex: 2,
+          }}
+        />
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', color: t.muted2, fontSize: '12px', marginBottom: '6px' }}>
-              Mot de passe
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%', padding: '10px 14px', background: t.surface2,
-                border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
-                color: t.text, fontSize: '14px', outline: 'none', boxSizing: 'border-box'
-              }}
-            />
-          </div>
+        {/* Spacer invisible — occupe la place du haut pour space-between */}
+        <div style={{ height: '60px' }} />
 
-          {error && (
-            <div style={{
-              background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)',
-              borderRadius: '8px', padding: '10px 14px', color: t.coral,
-              fontSize: '13px', marginBottom: '16px'
-            }}>
-              {error}
+        {/* Citation centrale */}
+        <div>
+          <div style={{ display: 'flex', marginBottom: '28px' }}>
+            <div style={{ height: '3px', width: '48px', background: '#f0eeea' }} />
+            <div style={{ height: '3px', width: '48px', background: '#9b8ec4' }} />
+            <div style={{ height: '3px', width: '48px', background: '#8a1c30' }} />
+          </div>
+          <p style={{
+            fontSize: '22px',
+            fontWeight: '300',
+            color: '#f0eeea',
+            lineHeight: 1.4,
+            letterSpacing: '-0.3px',
+            marginBottom: '16px',
+          }}>
+            Prépare ton concours.<br />
+            <span style={{ color: '#9b8ec4', fontWeight: '500' }}>Suis ta progression.</span>
+          </p>
+          <p style={{ fontSize: '13px', color: '#4a4847', lineHeight: 1.6 }}>
+            Khôlles, planning, résultats —<br />tout au même endroit.
+          </p>
+        </div>
+
+        {/* Bas du panneau */}
+        <div style={{ fontSize: '11px', color: '#2e2d2b', letterSpacing: '0.3px' }}>
+          © {new Date().getFullYear()} UnivUp
+        </div>
+      </div>
+
+      {/* ── Panneau droit — formulaire ── */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px',
+        position: 'relative',
+      }}>
+
+        {/* Lignes signature décoratives en arrière-plan */}
+        <svg
+          style={{ position: 'absolute', top: 0, right: 0, opacity: 0.06, pointerEvents: 'none' }}
+          width="400" height="400" viewBox="0 0 400 400"
+        >
+          <polyline points="400,0 180,0 80,200 400,200" fill="none" stroke="#f0eeea" strokeWidth="12" />
+          <polyline points="400,14 186,14 86,214 400,214" fill="none" stroke="#9b8ec4" strokeWidth="12" />
+          <polyline points="400,28 192,28 92,228 400,228" fill="none" stroke="#8a1c30" strokeWidth="12" />
+        </svg>
+
+        <div style={{ width: '100%', maxWidth: '360px', position: 'relative', zIndex: 1 }}>
+
+          <h2 style={{
+            fontSize: '26px',
+            fontWeight: '700',
+            color: '#f0eeea',
+            letterSpacing: '-0.5px',
+            marginBottom: '6px',
+          }}>
+            Connexion
+          </h2>
+          <p style={{ fontSize: '13px', color: '#4a4847', marginBottom: '36px' }}>
+            Accède à ton espace personnel
+          </p>
+
+          <form onSubmit={handleLogin}>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: '600',
+                color: '#6e6c66',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                marginBottom: '8px',
+              }}>
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                placeholder="ton@email.com"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '8px',
+                  color: '#f0eeea',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.15s',
+                  fontFamily: 'inherit',
+                }}
+                onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%', padding: '11px', background: t.purple,
-              border: 'none', borderRadius: '8px', color: '#1a1228',
-              fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: loading ? 0.7 : 1
-            }}
-          >
-            {loading ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
+            <div style={{ marginBottom: '28px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: '600',
+                color: '#6e6c66',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                marginBottom: '8px',
+              }}>
+                Mot de passe
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '8px',
+                  color: '#f0eeea',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.15s',
+                  fontFamily: 'inherit',
+                }}
+                onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+              />
+            </div>
+
+            {error && (
+              <div style={{
+                background: 'rgba(138,28,48,0.15)',
+                border: '1px solid rgba(138,28,48,0.35)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                color: '#e07080',
+                fontSize: '13px',
+                marginBottom: '20px',
+              }}>
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '13px',
+                background: loading ? '#2a2838' : '#f0eeea',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#111010',
+                fontSize: '14px',
+                fontWeight: '700',
+                letterSpacing: '0.2px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'background 0.15s',
+                fontFamily: 'inherit',
+              }}
+              onMouseEnter={e => { if (!loading) e.target.style.background = '#ffffff' }}
+              onMouseLeave={e => { if (!loading) e.target.style.background = '#f0eeea' }}
+            >
+              {loading ? 'Connexion en cours...' : 'Se connecter'}
+            </button>
+
+          </form>
+
+          <div style={{ display: 'flex', marginTop: '36px' }}>
+            <div style={{ height: '2px', flex: 3, background: 'rgba(240,238,234,0.08)' }} />
+            <div style={{ height: '2px', flex: 1, background: 'rgba(155,142,196,0.3)' }} />
+            <div style={{ height: '2px', flex: 1, background: 'rgba(138,28,48,0.3)' }} />
+          </div>
+
+        </div>
       </div>
     </div>
   )
