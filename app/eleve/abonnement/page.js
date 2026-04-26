@@ -6,6 +6,8 @@ import { t } from '../../../lib/theme'
 export default function AbonnementPage() {
   const [abonnement, setAbonnement] = useState(null)
   const [paiements, setPaiements] = useState([])
+  const [packsDisponibles, setPacksDisponibles] = useState([])
+  const [packSelectionne, setPackSelectionne] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { fetchAbonnement() }, [])
@@ -32,6 +34,13 @@ export default function AbonnementPage() {
       setPaiements(paiData || [])
     }
 
+    const { data: packsData } = await supabase
+      .from('packs')
+      .select('*')
+      .eq('actif', true)
+      .order('ordre')
+    setPacksDisponibles(packsData || [])
+
     setLoading(false)
   }
 
@@ -45,13 +54,13 @@ export default function AbonnementPage() {
   }
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid t.border' },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid ' + t.border },
     title: { fontSize: '18px', fontWeight: '600', color: t.text },
     content: { padding: '24px 28px' },
     grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' },
-    card: { background: t.surface, border: '1px solid t.border', borderRadius: '12px', overflow: 'hidden' },
+    card: { background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', overflow: 'hidden' },
     cardBody: { padding: '20px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid t.border', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    cardHeader: { padding: '14px 20px', borderBottom: '1px solid ' + t.border, display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
     cardTitle: { fontSize: '13px', fontWeight: '600', color: t.text },
     row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' },
     label: { color: t.muted },
@@ -66,9 +75,83 @@ export default function AbonnementPage() {
   if (!abonnement) return (
     <div style={{ color: t.text }}>
       <div style={s.topbar}><h1 style={s.title}>Mon abonnement</h1></div>
-      <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>
-        Aucun abonnement trouvé — contacte UnivUp pour régulariser ta situation.
+      <div style={s.content}>
+        <div style={{ fontSize: '14px', color: t.muted, marginBottom: '24px' }}>
+          Choisis un pack ci-dessous pour voir les informations de paiement.
+        </div>
+        {packsDisponibles.length === 0 ? (
+          <div style={{ color: t.muted, textAlign: 'center', padding: '40px' }}>
+            Aucun pack disponible pour le moment — contacte UnivUp.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+            {packsDisponibles.map(pack => (
+              <div
+                key={pack.id}
+                onClick={() => setPackSelectionne(pack)}
+                style={{ background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', padding: '24px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = t.purple}
+                onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
+              >
+                <div style={{ fontSize: '16px', fontWeight: '600', color: t.text, marginBottom: '8px' }}>{pack.nom}</div>
+                {pack.description && (
+                  <div style={{ fontSize: '13px', color: t.muted2, marginBottom: '16px', lineHeight: 1.6 }}>{pack.description}</div>
+                )}
+                <div style={{ fontSize: '28px', fontWeight: '700', color: t.purple, marginBottom: '4px' }}>{pack.prix}€</div>
+                <div style={{ fontSize: '12px', color: t.muted, marginBottom: '16px' }}>pour {pack.duree_mois} mois</div>
+                <div style={{ fontSize: '12px', color: t.purple, fontWeight: '500' }}>Voir les informations de paiement →</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {packSelectionne && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          onClick={() => setPackSelectionne(null)}
+        >
+          <div
+            style={{ background: t.surface, border: '1px solid ' + t.border2, borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '480px' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ fontSize: '12px', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Pack sélectionné</div>
+              <div style={{ fontSize: '20px', fontWeight: '600', color: t.text }}>{packSelectionne.nom}</div>
+              <div style={{ fontSize: '24px', fontWeight: '700', color: t.purple, marginTop: '4px' }}>{packSelectionne.prix}€</div>
+            </div>
+
+            <div style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
+              Pour souscrire, effectue un virement bancaire avec les informations ci-dessous et contacte UnivUp pour confirmer. Ton accès sera activé sous 24h.
+            </div>
+
+            {[
+              { label: 'Bénéficiaire', value: 'YONI MILO ATTAL', mono: false },
+              { label: 'IBAN', value: 'FR76 2823 3000 0191 3356 4211 372', mono: true },
+              { label: 'BIC', value: 'REVOFRP2', mono: true },
+              { label: 'Banque', value: 'Revolut France', mono: false },
+              { label: 'Montant', value: packSelectionne.prix + '€', mono: true },
+              { label: 'Motif', value: 'UnivUp - ' + packSelectionne.nom, mono: false },
+            ].map(item => (
+              <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', gap: '16px' }}>
+                <span style={{ color: t.muted, flexShrink: 0 }}>{item.label}</span>
+                <span style={{ color: t.text, fontWeight: '500', fontFamily: item.mono ? 'monospace' : 'inherit', textAlign: 'right' }}>{item.value}</span>
+              </div>
+            ))}
+
+            <div style={{ marginTop: '20px', padding: '12px 14px', background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: '8px', fontSize: '12px', color: t.purple, lineHeight: 1.6 }}>
+              📌 Après ton virement, contacte UnivUp via le chat pour confirmer ton paiement et activer ton accès.
+            </div>
+
+            <button
+              onClick={() => setPackSelectionne(null)}
+              style={{ width: '100%', marginTop: '16px', padding: '10px', background: 'none', border: '1px solid ' + t.border2, borderRadius: '8px', color: t.muted2, cursor: 'pointer', fontSize: '13px' }}
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 
@@ -88,7 +171,6 @@ export default function AbonnementPage() {
       <div style={s.content}>
         <div style={s.grid2}>
 
-          {/* Pack */}
           <div style={s.card}>
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Mon pack</span>
@@ -113,36 +195,42 @@ export default function AbonnementPage() {
               <div style={{ ...s.row, borderBottom: 'none' }}>
                 <span style={s.label}>Reste à payer</span>
                 <span style={{ ...s.value, color: resteAPayer > 0 ? t.amber : t.teal }}>
-                  {resteAPayer > 0 ? `${resteAPayer.toFixed(2)}€` : '✓ Soldé'}
+                  {resteAPayer > 0 ? resteAPayer.toFixed(2) + '€' : '✓ Soldé'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* RIB */}
           <div style={s.card}>
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Informations de virement</span>
             </div>
             <div style={s.cardBody}>
               <div style={{ fontSize: '12px', color: t.muted, marginBottom: '16px', lineHeight: 1.6 }}>
-                Pour effectuer ton paiement, réalise un virement bancaire avec les informations ci-dessous. 
+                Pour effectuer ton paiement, réalise un virement bancaire avec les informations ci-dessous.
                 Indique bien ta <strong style={{ color: t.text }}>référence unique</strong> dans le motif du virement.
               </div>
+
+              {[
+                { label: 'Bénéficiaire', value: 'YONI MILO ATTAL', mono: false },
+                { label: 'IBAN', value: 'FR76 2823 3000 0191 3356 4211 372', mono: true },
+                { label: 'BIC', value: 'REVOFRP2', mono: true },
+              ].map(item => (
+                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '12px' }}>
+                  <span style={{ color: t.muted }}>{item.label}</span>
+                  <span style={{ color: t.text, fontWeight: '500', fontFamily: item.mono ? 'monospace' : 'inherit' }}>{item.value}</span>
+                </div>
+              ))}
+
               <div style={s.ribBox}>
                 <div style={{ fontSize: '10px', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
                   Référence à indiquer
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: '600', color: t.purple, fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                <div style={{ fontSize: '16px', fontWeight: '600', color: t.purple, fontFamily: 'monospace', letterSpacing: '0.05em' }}>
                   {abonnement.reference_virement || '—'}
                 </div>
               </div>
-              <div style={{ ...s.ribBox, marginTop: '10px' }}>
-                <div style={{ fontSize: '10px', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
-                  Bénéficiaire
-                </div>
-                <div style={{ fontSize: '14px', fontWeight: '500', color: t.text }}>UnivUp</div>
-              </div>
+
               <div style={{ fontSize: '11px', color: t.muted, marginTop: '12px' }}>
                 Une fois le virement reçu, ton accès sera activé sous 24h.
               </div>
@@ -150,7 +238,6 @@ export default function AbonnementPage() {
           </div>
         </div>
 
-        {/* Historique paiements */}
         <div style={s.card}>
           <div style={s.cardHeader}>
             <span style={s.cardTitle}>Historique des paiements</span>
@@ -165,7 +252,7 @@ export default function AbonnementPage() {
               <thead>
                 <tr>
                   {['Date', 'Montant', 'Statut'].map(h => (
-                    <th key={h} style={{ textAlign: 'left', fontSize: '10px', fontWeight: '500', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 20px', borderBottom: '1px solid t.border' }}>
+                    <th key={h} style={{ textAlign: 'left', fontSize: '10px', fontWeight: '500', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 20px', borderBottom: '1px solid ' + t.border }}>
                       {h}
                     </th>
                   ))}

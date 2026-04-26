@@ -21,6 +21,7 @@ export default function EleveSidebar() {
   }, [])
 
   const navItems = [
+    { href: '/eleve/profil', label: 'Mon profil', icon: '👤' },
     { href: '/eleve', label: 'Mon planning', icon: '📅' },
     { href: '/eleve/resultats', label: 'Mes résultats', icon: '📊' },
     { href: '/eleve/biblio', label: 'Bibliothèque', icon: '📄' },

@@ -1,12 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { t } from '../../../lib/theme'
+import AccesProtege from '../AccesProtege'
 
 export default function BiblioPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentFolder, setCurrentFolder] = useState(process.env.NEXT_PUBLIC_DRIVE_FOLDER_ID)
-  const [breadcrumb, setBreadcrumb] = useState([{ id: process.env.NEXT_PUBLIC_DRIVE_FOLDER_ID, name: 'Bibliothèque' }])
+  const [breadcrumb, setBreadcrumb] = useState([{ id: process.env.NEXT_PUBLIC_DRIVE_FOLDER_ID, name: 'Bibliotheque' }])
   const [viewerFile, setViewerFile] = useState(null)
   const [fileData, setFileData] = useState(null)
   const [fileMime, setFileMime] = useState(null)
@@ -24,7 +25,7 @@ export default function BiblioPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data } = await supabase.from('users').select('full_name, email').eq('id', user.id).single()
-        if (data) setUserName(`${data.full_name} · ${data.email}`)
+        if (data) setUserName(data.full_name + ' · ' + data.email)
       }
     }
     getName()
@@ -32,7 +33,7 @@ export default function BiblioPage() {
 
   async function fetchFolder(folderId) {
     setLoading(true)
-    const res = await fetch(`/api/drive/list?folderId=${folderId}`)
+    const res = await fetch('/api/drive/list?folderId=' + folderId)
     const data = await res.json()
     setItems(data.files || [])
     setLoading(false)
@@ -43,7 +44,7 @@ export default function BiblioPage() {
     if (!search.trim()) { fetchFolder(currentFolder); return }
     setLoading(true)
     setSearching(true)
-    const res = await fetch(`/api/drive/list?search=${encodeURIComponent(search)}`)
+    const res = await fetch('/api/drive/list?search=' + encodeURIComponent(search))
     const data = await res.json()
     setItems(data.files || [])
     setLoading(false)
@@ -73,7 +74,7 @@ export default function BiblioPage() {
     setFileMime(null)
     setCanvases([])
 
-    const res = await fetch(`/api/drive/file?fileId=${file.id}`)
+    const res = await fetch('/api/drive/file?fileId=' + file.id)
     const data = await res.json()
 
     if (data.mimeType === 'application/pdf') {
@@ -128,144 +129,146 @@ export default function BiblioPage() {
   function formatSize(size) {
     if (!size) return ''
     const kb = parseInt(size) / 1024
-    if (kb < 1024) return `${Math.round(kb)} Ko`
-    return `${(kb / 1024).toFixed(1)} Mo`
+    if (kb < 1024) return Math.round(kb) + ' Ko'
+    return (kb / 1024).toFixed(1) + ' Mo'
   }
 
   const isImage = fileMime?.includes('image')
   const isPDF = fileMime === 'application/pdf'
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: `1px solid ${t.border}` },
+    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid ' + t.border },
     title: { fontSize: '18px', fontWeight: '600', color: t.text },
     content: { padding: '24px 28px' },
-    card: { background: t.surface, border: `1px solid ${t.border}`, borderRadius: '12px', overflow: 'hidden' },
+    card: { background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', overflow: 'hidden' },
     item: { display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 16px', cursor: 'pointer', transition: 'background 0.15s' },
     modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', flexDirection: 'column', zIndex: 50 },
-    modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: t.surface, borderBottom: `1px solid ${t.border}`, flexShrink: 0 },
+    modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: t.surface, borderBottom: '1px solid ' + t.border, flexShrink: 0 },
   }
 
   return (
-    <div style={{ color: t.text }}>
-      <div style={s.topbar}>
-        <h1 style={s.title}>Bibliothèque</h1>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher un fichier…"
-            style={{ padding: '7px 12px', background: t.surface2, border: `1px solid ${t.border2}`, borderRadius: '8px', color: t.text, fontSize: '13px', outline: 'none', width: '240px' }}
-          />
-          <button type="submit" style={{ padding: '7px 14px', background: t.purple, border: 'none', borderRadius: '8px', color: '#1a1228', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>
-            Chercher
-          </button>
-          {searching && (
-            <button type="button" onClick={clearSearch} style={{ padding: '7px 14px', background: 'none', border: `1px solid ${t.border2}`, borderRadius: '8px', color: t.muted2, fontSize: '13px', cursor: 'pointer' }}>
-              ✕ Effacer
+    <AccesProtege>
+      <div style={{ color: t.text }}>
+        <div style={s.topbar}>
+          <h1 style={s.title}>Bibliotheque</h1>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Rechercher un fichier..."
+              style={{ padding: '7px 12px', background: t.surface2, border: '1px solid ' + t.border2, borderRadius: '8px', color: t.text, fontSize: '13px', outline: 'none', width: '240px' }}
+            />
+            <button type="submit" style={{ padding: '7px 14px', background: t.purple, border: 'none', borderRadius: '8px', color: '#1a1228', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>
+              Chercher
             </button>
-          )}
-        </form>
-      </div>
-
-      <div style={s.content}>
-        {!searching && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px', fontSize: '13px' }}>
-            {breadcrumb.map((crumb, i) => (
-              <span key={crumb.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {i > 0 && <span style={{ color: t.muted }}>›</span>}
-                <span onClick={() => goToBreadcrumb(i)} style={{ color: i === breadcrumb.length - 1 ? t.text : t.purple, cursor: 'pointer', fontWeight: i === breadcrumb.length - 1 ? '500' : '400' }}>
-                  {crumb.name}
-                </span>
-              </span>
-            ))}
-          </div>
-        )}
-
-        {searching && (
-          <div style={{ fontSize: '13px', color: t.muted, marginBottom: '16px' }}>
-            Résultats pour "<span style={{ color: t.text }}>{search}</span>"
-          </div>
-        )}
-
-        <div style={s.card}>
-          {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Chargement…</div>
-          ) : items.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>
-              {searching ? 'Aucun résultat.' : 'Dossier vide.'}
-            </div>
-          ) : (
-            items.map((item, idx) => (
-              <div
-                key={item.id}
-                style={{ ...s.item, borderBottom: idx === items.length - 1 ? 'none' : `1px solid ${t.border}` }}
-                onClick={() => item.mimeType === 'application/vnd.google-apps.folder' ? openFolder(item.id, item.name) : openFile(item)}
-                onMouseEnter={e => e.currentTarget.style.background = t.surface2}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                <span style={{ fontSize: '20px' }}>{getIcon(item.mimeType)}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', fontWeight: '500', color: t.text }}>{item.name}</div>
-                  <div style={{ fontSize: '11px', color: t.muted }}>
-                    {new Date(item.modifiedTime).toLocaleDateString('fr-FR')}
-                    {item.size && ` · ${formatSize(item.size)}`}
-                  </div>
-                </div>
-                {item.mimeType !== 'application/vnd.google-apps.folder' && (
-                  <span style={{ fontSize: '11px', color: t.purple }}>Ouvrir →</span>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {viewerFile && (
-        <div style={s.modal} onContextMenu={e => e.preventDefault()}>
-          <div style={s.modalHeader}>
-            <div style={{ fontSize: '14px', fontWeight: '500', color: t.text }}>{viewerFile.name}</div>
-            <button onClick={closeViewer} style={{ background: 'none', border: `1px solid ${t.border2}`, borderRadius: '8px', padding: '6px 12px', color: t.muted2, cursor: 'pointer', fontSize: '13px' }}>
-              ✕ Fermer
-            </button>
-          </div>
-
-          <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', gap: '12px', userSelect: 'none' }}>
-            {loadingFile && (
-              <div style={{ color: t.muted, padding: '60px' }}>Chargement du fichier…</div>
+            {searching && (
+              <button type="button" onClick={clearSearch} style={{ padding: '7px 14px', background: 'none', border: '1px solid ' + t.border2, borderRadius: '8px', color: t.muted2, fontSize: '13px', cursor: 'pointer' }}>
+                Effacer
+              </button>
             )}
+          </form>
+        </div>
 
-            {!loadingFile && isPDF && canvases.length > 0 && canvases.map((src, i) => (
-              <div key={i} style={{ position: 'relative', maxWidth: '900px', width: '100%' }}>
+        <div style={s.content}>
+          {!searching && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px', fontSize: '13px' }}>
+              {breadcrumb.map((crumb, i) => (
+                <span key={crumb.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {i > 0 && <span style={{ color: t.muted }}>›</span>}
+                  <span onClick={() => goToBreadcrumb(i)} style={{ color: i === breadcrumb.length - 1 ? t.text : t.purple, cursor: 'pointer', fontWeight: i === breadcrumb.length - 1 ? '500' : '400' }}>
+                    {crumb.name}
+                  </span>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {searching && (
+            <div style={{ fontSize: '13px', color: t.muted, marginBottom: '16px' }}>
+              Resultats pour "<span style={{ color: t.text }}>{search}</span>"
+            </div>
+          )}
+
+          <div style={s.card}>
+            {loading ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Chargement...</div>
+            ) : items.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>
+                {searching ? 'Aucun resultat.' : 'Dossier vide.'}
+              </div>
+            ) : (
+              items.map((item, idx) => (
+                <div
+                  key={item.id}
+                  style={{ ...s.item, borderBottom: idx === items.length - 1 ? 'none' : '1px solid ' + t.border }}
+                  onClick={() => item.mimeType === 'application/vnd.google-apps.folder' ? openFolder(item.id, item.name) : openFile(item)}
+                  onMouseEnter={e => e.currentTarget.style.background = t.surface2}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span style={{ fontSize: '20px' }}>{getIcon(item.mimeType)}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '13px', fontWeight: '500', color: t.text }}>{item.name}</div>
+                    <div style={{ fontSize: '11px', color: t.muted }}>
+                      {new Date(item.modifiedTime).toLocaleDateString('fr-FR')}
+                      {item.size && ' · ' + formatSize(item.size)}
+                    </div>
+                  </div>
+                  {item.mimeType !== 'application/vnd.google-apps.folder' && (
+                    <span style={{ fontSize: '11px', color: t.purple }}>Ouvrir →</span>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {viewerFile && (
+          <div style={s.modal} onContextMenu={e => e.preventDefault()}>
+            <div style={s.modalHeader}>
+              <div style={{ fontSize: '14px', fontWeight: '500', color: t.text }}>{viewerFile.name}</div>
+              <button onClick={closeViewer} style={{ background: 'none', border: '1px solid ' + t.border2, borderRadius: '8px', padding: '6px 12px', color: t.muted2, cursor: 'pointer', fontSize: '13px' }}>
+                Fermer
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', gap: '12px', userSelect: 'none' }}>
+              {loadingFile && (
+                <div style={{ color: t.muted, padding: '60px' }}>Chargement du fichier...</div>
+              )}
+
+              {!loadingFile && isPDF && canvases.length > 0 && canvases.map((src, i) => (
+                <div key={i} style={{ position: 'relative', maxWidth: '900px', width: '100%' }}>
+                  <img
+                    src={src}
+                    alt={'Page ' + (i + 1)}
+                    style={{ width: '100%', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.5)', display: 'block', pointerEvents: 'none' }}
+                    draggable={false}
+                  />
+                </div>
+              ))}
+
+              {!loadingFile && isPDF && canvases.length === 0 && (
+                <div style={{ color: t.muted, padding: '40px' }}>Rendu en cours...</div>
+              )}
+
+              {!loadingFile && isImage && fileData && (
                 <img
-                  src={src}
-                  alt={`Page ${i + 1}`}
-                  style={{ width: '100%', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.5)', display: 'block', pointerEvents: 'none' }}
+                  src={'data:' + fileMime + ';base64,' + fileData}
+                  alt={viewerFile.name}
+                  style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '8px', objectFit: 'contain', pointerEvents: 'none' }}
                   draggable={false}
                 />
-              </div>
-            ))}
+              )}
 
-            {!loadingFile && isPDF && canvases.length === 0 && (
-              <div style={{ color: t.muted, padding: '40px' }}>Rendu en cours…</div>
-            )}
-
-            {!loadingFile && isImage && fileData && (
-              <img
-                src={`data:${fileMime};base64,${fileData}`}
-                alt={viewerFile.name}
-                style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '8px', objectFit: 'contain', pointerEvents: 'none' }}
-                draggable={false}
-              />
-            )}
-
-            {!loadingFile && !isPDF && !isImage && fileData && (
-              <div style={{ color: t.muted, padding: '60px', textAlign: 'center' }}>
-                Ce type de fichier ne peut pas être prévisualisé.
-              </div>
-            )}
+              {!loadingFile && !isPDF && !isImage && fileData && (
+                <div style={{ color: t.muted, padding: '60px', textAlign: 'center' }}>
+                  Ce type de fichier ne peut pas etre previsualise.
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </AccesProtege>
   )
 }
