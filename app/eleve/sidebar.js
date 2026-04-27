@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '../../lib/supabase'
 import { useEffect, useState } from 'react'
-import { t } from '../../lib/theme'
 
 export default function EleveSidebar() {
   const pathname = usePathname()
@@ -24,9 +23,9 @@ export default function EleveSidebar() {
   const navItems = [
     { href: '/eleve/profil', label: 'Mon profil', icon: '👤' },
     { href: '/eleve', label: 'Mon planning', icon: '📅' },
-    { href: '/eleve/resultats', label: 'Mes résultats', icon: '📊' },
-    { href: '/eleve/biblio', label: 'Bibliothèque', icon: '📄' },
-    { href: '/eleve/gei', label: 'Prépa GEI', icon: '🎯' },
+    { href: '/eleve/resultats', label: 'Mes resultats', icon: '📊' },
+    { href: '/eleve/biblio', label: 'Bibliotheque', icon: '📄' },
+    { href: '/eleve/gei', label: 'Prepa GEI', icon: '🎯' },
     { href: '/eleve/abonnement', label: 'Mon abonnement', icon: '💳' },
     { href: '/chat', label: 'Chat', icon: '💬' },
   ]
@@ -36,15 +35,20 @@ export default function EleveSidebar() {
     window.location.href = '/'
   }
 
+  const initials = eleveName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+
   return (
     <div style={{
-      width: '220px', flexShrink: 0, background: t.surface,
-      borderRight: '1px solid t.border',
+      width: '220px', flexShrink: 0,
+      background: '#111010',
+      borderRight: '1px solid rgba(255,255,255,0.05)',
       display: 'flex', flexDirection: 'column', padding: '20px 0',
-      position: 'fixed', height: '100vh'
+      position: 'fixed', height: '100vh',
+      fontFamily: "'DM Sans', system-ui, sans-serif",
     }}>
+
       {/* Logo */}
-      <div style={{ padding: '0 20px 20px', borderBottom: '1px solid t.border', marginBottom: '16px' }}>
+      <div style={{ padding: '0 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '8px' }}>
         <Image
           src="/Logo1w_univup-removebg.png"
           alt="UnivUp"
@@ -52,49 +56,73 @@ export default function EleveSidebar() {
           height={40}
           style={{ objectFit: 'contain' }}
         />
-        <div style={{ fontSize: '13px', color: t.muted, marginTop: '2px', marginLeft: '10px' }}>Espace étudiant</div>
+        <div style={{ fontSize: '13px', color: '#4a4847', marginTop: '2px', marginLeft: '10px', letterSpacing: '0.3px' }}>Espace etudiant</div>
+      </div>
+
+      {/* Séparateur tricolore */}
+      <div style={{ display: 'flex', marginBottom: '16px', paddingLeft: '20px' }}>
+        <div style={{ height: '2px', width: '32px', background: '#f0eeea' }} />
+        <div style={{ height: '2px', width: '32px', background: '#9b8ec4' }} />
+        <div style={{ height: '2px', width: '32px', background: '#8a1c30' }} />
       </div>
 
       {/* Nav */}
       <div style={{ padding: '0 12px', flex: 1 }}>
-        {navItems.map(item => (
-          <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              padding: '8px 10px', borderRadius: '8px', marginBottom: '2px',
-              background: pathname === item.href ? t.surface2 : 'none',
-              color: pathname === item.href ? t.text : t.muted,
-              fontSize: '13px', cursor: 'pointer'
-            }}>
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </div>
-          </Link>
-        ))}
+        {navItems.map(item => {
+          const isActive = pathname === item.href
+          return (
+            <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '8px 10px', borderRadius: '8px', marginBottom: '2px',
+                background: isActive ? 'rgba(155,142,196,0.1)' : 'none',
+                color: isActive ? '#9b8ec4' : '#6e6c66',
+                fontSize: '13px', cursor: 'pointer',
+                borderLeft: isActive ? '2px solid #9b8ec4' : '2px solid transparent',
+                transition: 'all 0.15s',
+              }}>
+                <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                <span style={{ fontWeight: isActive ? '500' : '400' }}>{item.label}</span>
+              </div>
+            </Link>
+          )
+        })}
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '16px 12px 0', borderTop: '1px solid t.border' }}>
+      <div style={{ padding: '0 12px' }}>
+        <div style={{ display: 'flex', marginBottom: '12px', paddingLeft: '8px' }}>
+          <div style={{ height: '2px', flex: 3, background: 'rgba(240,238,234,0.08)' }} />
+          <div style={{ height: '2px', flex: 1, background: 'rgba(155,142,196,0.3)' }} />
+          <div style={{ height: '2px', flex: 1, background: 'rgba(138,28,48,0.3)' }} />
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px' }}>
           <div style={{
             width: '28px', height: '28px', borderRadius: '50%',
-            background: 'rgba(96,165,250,0.12)', color: t.blue,
+            background: 'rgba(155,142,196,0.15)', color: '#9b8ec4',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '11px', fontWeight: '600'
           }}>
-            {eleveName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+            {initials || '?'}
           </div>
           <div>
-            <div style={{ fontSize: '12px', fontWeight: '500', color: t.text }}>{eleveName || '…'}</div>
-            <div style={{ fontSize: '10px', color: t.muted }}>Étudiant</div>
+            <div style={{ fontSize: '12px', fontWeight: '500', color: '#f0eeea' }}>{eleveName || '...'}</div>
+            <div style={{ fontSize: '10px', color: '#4a4847' }}>Etudiant</div>
           </div>
         </div>
-        <button onClick={handleLogout} style={{
-          width: '100%', padding: '7px', marginTop: '8px',
-          background: 'none', border: '1px solid t.border',
-          borderRadius: '8px', color: t.muted, fontSize: '12px', cursor: 'pointer'
-        }}>
-          Se déconnecter
+        <button
+          onClick={handleLogout}
+          style={{
+            width: '100%', padding: '7px', marginTop: '8px',
+            background: 'none', border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '8px', color: '#4a4847', fontSize: '12px', cursor: 'pointer',
+            fontFamily: 'inherit', transition: 'color 0.15s',
+          }}
+          onMouseEnter={e => e.target.style.color = '#f0eeea'}
+          onMouseLeave={e => e.target.style.color = '#4a4847'}
+        >
+          Se deconnecter
         </button>
       </div>
     </div>
