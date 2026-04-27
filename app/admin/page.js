@@ -1,10 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { t } from '../../lib/theme'
 import Link from 'next/link'
+import { useTheme, getTheme } from '../context/ThemeContext'
 
 export default function AdminDashboard() {
+  const { theme, isDark } = useTheme()
+  const c = getTheme(theme)
+
   const [stats, setStats] = useState({ elevesActifs: 0, elevesAttente: 0, seancesMois: 0, seancesRestantes: 0, salairesAVerser: 0, paiementsAttente: 0 })
   const [alertes, setAlertes] = useState({ abosExpirent: [], abosEnAttente: [], seancesNonPointees: [] })
   const [prochainesSeances, setProchainesSeances] = useState([])
@@ -20,14 +23,11 @@ export default function AdminDashboard() {
     const dans14j = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     const il7yA = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-    const [
-      elevesRes, abosRes, seancesMoisRes, prochainesRes,
-      seancesPasseesRes, salairesRes, paiementsRes
-    ] = await Promise.all([
+    const [elevesRes, abosRes, seancesMoisRes, prochainesRes, seancesPasseesRes, salairesRes, paiementsRes] = await Promise.all([
       supabase.from('users').select('id, is_active').eq('role', 'eleve'),
       supabase.from('abonnements').select('*, users:eleve_id(full_name, email)'),
       supabase.from('seances').select('id, statut').gte('date_debut', moisDebut).lt('date_debut', moisFin),
-      supabase.from('seances').select(`*, prof:prof_id(full_name)`).gte('date_debut', now.toISOString()).order('date_debut').limit(5),
+      supabase.from('seances').select('*, prof:prof_id(full_name)').gte('date_debut', now.toISOString()).order('date_debut').limit(5),
       supabase.from('seances').select('id, statut, titre, prof:prof_id(full_name), date_debut').lt('date_debut', now.toISOString()).eq('statut', 'planifiee'),
       supabase.from('salaires_profs').select('montant_du, montant_verse, mois'),
       supabase.from('paiements_eleves').select('montant'),
@@ -39,27 +39,18 @@ export default function AdminDashboard() {
     const salaires = salairesRes.data || []
     const paiements = paiementsRes.data || []
 
-    // Stats
     const elevesActifs = eleves.filter(e => e.is_active).length
     const elevesAttente = abos.filter(a => a.statut === 'en_attente').length
     const seancesRestantes = seancesMois.filter(s => s.statut === 'planifiee').length
-
-    // Salaires à verser ce mois
     const moisKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
     const salMois = salaires.filter(s => s.mois === moisKey)
     const totalDu = salMois.reduce((sum, s) => sum + parseFloat(s.montant_du || 0), 0)
     const totalVerse = salMois.reduce((sum, s) => sum + parseFloat(s.montant_verse || 0), 0)
     const salairesAVerser = totalDu - totalVerse
-
-    // Paiements élèves en attente
     const abosEnAttente = abos.filter(a => a.statut === 'en_attente')
     const paiementsAttente = abosEnAttente.reduce((sum, a) => sum + parseFloat(a.montant || 0), 0)
-
-    // Alertes
     const abosExpirent = abos.filter(a => a.statut === 'actif' && a.date_fin && a.date_fin <= dans14j && a.date_fin >= now.toISOString().split('T')[0])
     const abosAttenteVieux = abos.filter(a => a.statut === 'en_attente' && a.created_at <= il7yA)
-
-    // Financier
     const recettesRecues = paiements.reduce((sum, p) => sum + parseFloat(p.montant || 0), 0)
     const recettesAttendues = abos.reduce((sum, a) => sum + parseFloat(a.montant || 0), 0)
     const chargesVersees = salaires.reduce((sum, s) => sum + parseFloat(s.montant_verse || 0), 0)
@@ -73,111 +64,98 @@ export default function AdminDashboard() {
   }
 
   const TYPES = {
-    cours: { label: 'Cours', color: t.purple },
-    kholle: { label: 'Khôlle', color: t.teal },
-    entretien: { label: 'Entretien', color: t.coral }
+    cours: { label: 'Cours', color: c.purple },
+    kholle: { label: 'Kholle', color: c.teal },
+    entretien: { label: 'Entretien', color: c.coral }
   }
 
   const totalAlertes = alertes.abosExpirent.length + alertes.abosEnAttente.length + alertes.seancesNonPointees.length
-
-  const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid t.border' },
-    title: { fontSize: '18px', fontWeight: '600', color: t.text },
-    content: { padding: '24px 28px' },
-    statCard: { background: t.surface, border: '1px solid t.border', borderRadius: '12px', padding: '16px' },
-    card: { background: t.surface, border: '1px solid t.border', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid t.border', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '13px', fontWeight: '600', color: t.text },
-    cardBody: { padding: '16px 20px' },
-    alerte: { display: 'flex', gap: '10px', padding: '10px 14px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start' },
-    alerteAmber: { background: 'rgba(251,191,36,0.1)', color: t.amber, border: '1px solid rgba(251,191,36,0.2)' },
-    alerteCoral: { display: 'flex', gap: '10px', padding: '10px 14px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start', background: 'rgba(248,113,113,0.1)', color: t.coral, border: '1px solid rgba(248,113,113,0.2)' },
-    seanceItem: { display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' },
-    stripe: { width: '3px', borderRadius: '2px', alignSelf: 'stretch', minHeight: '36px', flexShrink: 0 },
-    progressBar: { height: '6px', background: t.border, borderRadius: '3px', overflow: 'hidden', marginTop: '8px' },
-  }
-
-  if (loading) return (
-    <div style={{ padding: '40px', color: t.muted, textAlign: 'center' }}>Chargement…</div>
-  )
-
   const now = new Date()
   const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
 
+  const card = {
+    background: c.surface,
+    border: '1px solid ' + c.border,
+    borderRadius: '12px',
+    overflow: 'hidden',
+    marginBottom: '16px',
+    boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.04)',
+    transition: 'background 0.2s',
+  }
+
+  if (loading) return (
+    <div style={{ padding: '40px', color: c.muted, textAlign: 'center', background: c.bg, minHeight: '100vh', fontFamily: "'DM Sans', system-ui" }}>
+      Chargement...
+    </div>
+  )
+
   return (
-    <div style={{ color: t.text }}>
-      <div style={s.topbar}>
-        <h1 style={s.title}>Tableau de bord</h1>
-        <span style={{ fontSize: '12px', color: t.muted, textTransform: 'capitalize' }}>{dateStr}</span>
+    <div style={{ color: c.text, fontFamily: "'DM Sans', system-ui, sans-serif", minHeight: '100vh', background: c.bg, transition: 'background 0.2s' }}>
+
+      {/* Topbar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 32px', borderBottom: '1px solid ' + c.border, background: c.surface, transition: 'background 0.2s' }}>
+        <div>
+          <h1 style={{ fontSize: '20px', fontWeight: '700', color: c.text, letterSpacing: '-0.3px', margin: 0 }}>Tableau de bord</h1>
+          <div style={{ fontSize: '11px', color: c.muted, marginTop: '3px', textTransform: 'capitalize' }}>{dateStr}</div>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ height: '2px', width: '32px', background: isDark ? '#f0eeea' : '#111010' }} />
+          <div style={{ height: '2px', width: '32px', background: '#9b8ec4' }} />
+          <div style={{ height: '2px', width: '32px', background: '#8a1c30' }} />
+        </div>
       </div>
 
-      <div style={s.content}>
+      <div style={{ padding: '28px 32px' }}>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', marginBottom: '20px' }}>
-          <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Élèves actifs</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: t.purple }}>{stats.elevesActifs}</div>
-            <div style={{ fontSize: '11px', color: stats.elevesAttente > 0 ? t.amber : t.muted, marginTop: '4px' }}>
-              {stats.elevesAttente > 0 ? `⚠ ${stats.elevesAttente} en attente de paiement` : 'Tous à jour'}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', marginBottom: '24px' }}>
+          {[
+            { label: 'Eleves actifs', value: stats.elevesActifs, color: c.purple, sub: stats.elevesAttente > 0 ? `${stats.elevesAttente} en attente` : 'Tous a jour', subColor: stats.elevesAttente > 0 ? c.amber : c.muted },
+            { label: 'Seances ce mois', value: stats.seancesMois, color: c.teal, sub: `${stats.seancesRestantes} restantes`, subColor: c.muted },
+            { label: 'Salaires a verser', value: stats.salairesAVerser > 0 ? stats.salairesAVerser.toFixed(0) + 'EUR' : 'Solde', color: stats.salairesAVerser > 0 ? c.amber : c.teal, sub: 'ce mois', subColor: c.muted },
+            { label: 'Paiements en attente', value: stats.paiementsAttente > 0 ? stats.paiementsAttente.toFixed(0) + 'EUR' : 'OK', color: stats.paiementsAttente > 0 ? c.coral : c.teal, sub: stats.elevesAttente + ' eleve' + (stats.elevesAttente > 1 ? 's' : ''), subColor: c.muted },
+          ].map((s, i) => (
+            <div key={i} style={{ ...card, padding: '20px', marginBottom: 0, borderTop: isDark ? 'none' : '3px solid ' + s.color }}>
+              <div style={{ fontSize: '10px', color: c.muted, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>{s.label}</div>
+              <div style={{ fontSize: '28px', fontWeight: '700', color: s.color, letterSpacing: '-0.5px', marginBottom: '6px' }}>{s.value}</div>
+              <div style={{ fontSize: '11px', color: s.subColor }}>{s.sub}</div>
             </div>
-          </div>
-          <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Séances ce mois</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: t.teal }}>{stats.seancesMois}</div>
-            <div style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>{stats.seancesRestantes} restantes</div>
-          </div>
-          <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Salaires à verser</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: stats.salairesAVerser > 0 ? t.amber : t.teal }}>
-              {stats.salairesAVerser > 0 ? `${stats.salairesAVerser.toFixed(0)}€` : '✓ Soldé'}
-            </div>
-            <div style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>ce mois</div>
-          </div>
-          <div style={s.statCard}>
-            <div style={{ fontSize: '11px', color: t.muted, marginBottom: '8px' }}>Paiements en attente</div>
-            <div style={{ fontSize: '26px', fontWeight: '600', color: stats.paiementsAttente > 0 ? t.coral : t.teal }}>
-              {stats.paiementsAttente > 0 ? `${stats.paiementsAttente.toFixed(0)}€` : '✓'}
-            </div>
-            <div style={{ fontSize: '11px', color: t.muted, marginTop: '4px' }}>{alertes.abosEnAttente.length + (stats.elevesAttente - alertes.abosEnAttente.length)} élève{stats.elevesAttente > 1 ? 's' : ''}</div>
-          </div>
+          ))}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
 
           {/* Alertes */}
-          <div style={s.card}>
-            <div style={s.cardHeader}>
-              <span style={s.cardTitle}>Alertes</span>
+          <div style={card}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid ' + c.border, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: c.text }}>Alertes</span>
               {totalAlertes > 0 && (
-                <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(248,113,113,0.1)', color: t.coral }}>
+                <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', background: isDark ? 'rgba(248,113,113,0.15)' : 'rgba(220,38,38,0.08)', color: c.coral, border: '1px solid ' + (isDark ? 'rgba(248,113,113,0.2)' : 'rgba(220,38,38,0.15)') }}>
                   {totalAlertes}
                 </span>
               )}
             </div>
-            <div style={s.cardBody}>
+            <div style={{ padding: '16px 20px' }}>
               {totalAlertes === 0 ? (
-                <div style={{ color: t.muted, fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
-                  ✓ Aucune alerte — tout est en ordre
-                </div>
+                <div style={{ color: c.muted, fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>✓ Aucune alerte</div>
               ) : (
                 <>
                   {alertes.abosExpirent.map(a => (
-                    <div key={a.id} style={{ ...s.alerte, ...s.alerteAmber }}>
+                    <div key={a.id} style={{ display: 'flex', gap: '10px', padding: '10px 12px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start', background: isDark ? 'rgba(251,191,36,0.08)' : 'rgba(217,119,6,0.06)', color: c.amber, border: '1px solid ' + (isDark ? 'rgba(251,191,36,0.15)' : 'rgba(217,119,6,0.15)') }}>
                       <span>⏰</span>
                       <span><strong>{a.users?.full_name}</strong> — abonnement expire le {new Date(a.date_fin).toLocaleDateString('fr-FR')}</span>
                     </div>
                   ))}
                   {alertes.abosEnAttente.map(a => (
-                    <div key={a.id} style={s.alerteCoral}>
+                    <div key={a.id} style={{ display: 'flex', gap: '10px', padding: '10px 12px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start', background: isDark ? 'rgba(248,113,113,0.08)' : 'rgba(220,38,38,0.06)', color: c.coral, border: '1px solid ' + (isDark ? 'rgba(248,113,113,0.15)' : 'rgba(220,38,38,0.15)') }}>
                       <span>💳</span>
                       <span><strong>{a.users?.full_name}</strong> — virement en attente depuis +7 jours</span>
                     </div>
                   ))}
                   {alertes.seancesNonPointees.map(s2 => (
-                    <div key={s2.id} style={{ ...s.alerte, ...s.alerteAmber }}>
+                    <div key={s2.id} style={{ display: 'flex', gap: '10px', padding: '10px 12px', borderRadius: '8px', marginBottom: '8px', fontSize: '12px', alignItems: 'flex-start', background: isDark ? 'rgba(251,191,36,0.08)' : 'rgba(217,119,6,0.06)', color: c.amber, border: '1px solid ' + (isDark ? 'rgba(251,191,36,0.15)' : 'rgba(217,119,6,0.15)') }}>
                       <span>📋</span>
-                      <span><strong>{s2.prof?.full_name}</strong> — séance "{s2.titre}" non pointée ({new Date(s2.date_debut).toLocaleDateString('fr-FR')})</span>
+                      <span><strong>{s2.prof?.full_name}</strong> — "{s2.titre}" non pointee ({new Date(s2.date_debut).toLocaleDateString('fr-FR')})</span>
                     </div>
                   ))}
                 </>
@@ -186,30 +164,28 @@ export default function AdminDashboard() {
           </div>
 
           {/* Prochaines séances */}
-          <div style={s.card}>
-            <div style={s.cardHeader}>
-              <span style={s.cardTitle}>Prochaines séances</span>
-              <Link href="/admin/planning" style={{ fontSize: '11px', color: t.purple, textDecoration: 'none' }}>Voir tout →</Link>
+          <div style={card}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid ' + c.border, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: c.text }}>Prochaines seances</span>
+              <Link href="/admin/planning" style={{ fontSize: '11px', color: c.purple, textDecoration: 'none' }}>Voir tout →</Link>
             </div>
-            <div style={s.cardBody}>
+            <div style={{ padding: '8px 20px' }}>
               {prochainesSeances.length === 0 ? (
-                <div style={{ color: t.muted, fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
-                  Aucune séance à venir.
-                </div>
+                <div style={{ color: c.muted, fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>Aucune seance a venir.</div>
               ) : (
                 prochainesSeances.map(seance => (
-                  <div key={seance.id} style={{ ...s.seanceItem }}>
-                    <div style={{ ...s.stripe, background: TYPES[seance.type]?.color }} />
+                  <div key={seance.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 0', borderBottom: '1px solid ' + c.border }}>
+                    <div style={{ width: '3px', borderRadius: '2px', alignSelf: 'stretch', minHeight: '36px', background: TYPES[seance.type]?.color, flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: '500', color: t.text, marginBottom: '2px' }}>{seance.titre}</div>
-                      <div style={{ fontSize: '11px', color: t.muted }}>
+                      <div style={{ fontSize: '13px', fontWeight: '500', color: c.text, marginBottom: '2px' }}>{seance.titre}</div>
+                      <div style={{ fontSize: '11px', color: c.muted }}>
                         {new Date(seance.date_debut).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })}
                         {' · '}
                         {new Date(seance.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         {seance.prof?.full_name && ` · ${seance.prof.full_name}`}
                       </div>
                     </div>
-                    <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[seance.type]?.color + '22', color: TYPES[seance.type]?.color, flexShrink: 0 }}>
+                    <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[seance.type]?.color + (isDark ? '22' : '15'), color: TYPES[seance.type]?.color, flexShrink: 0 }}>
                       {TYPES[seance.type]?.label}
                     </span>
                   </div>
@@ -220,44 +196,41 @@ export default function AdminDashboard() {
         </div>
 
         {/* Financier */}
-        <div style={s.card}>
-          <div style={s.cardHeader}><span style={s.cardTitle}>Aperçu financier global</span></div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0' }}>
-            <div style={{ padding: '20px', borderRight: '1px solid t.border' }}>
-              <div style={{ fontSize: '12px', color: t.muted, marginBottom: '12px' }}>Recettes élèves</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', color: t.muted2 }}>Reçu</span>
-                <span style={{ fontFamily: 'monospace', color: t.teal, fontWeight: '600' }}>{financier.recettesRecues.toFixed(0)}€</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: t.muted2 }}>Total attendu</span>
-                <span style={{ fontFamily: 'monospace', color: t.text }}>{financier.recettesAttendues.toFixed(0)}€</span>
-              </div>
-              <div style={s.progressBar}>
-                <div style={{ height: '100%', borderRadius: '3px', background: t.teal, width: `${financier.recettesAttendues > 0 ? Math.min((financier.recettesRecues / financier.recettesAttendues) * 100, 100) : 0}%`, transition: 'width 0.5s' }} />
-              </div>
-              <div style={{ fontSize: '11px', color: t.muted, marginTop: '6px' }}>
-                {financier.recettesAttendues > 0 ? `${Math.round((financier.recettesRecues / financier.recettesAttendues) * 100)}% collecté` : '—'}
-              </div>
-            </div>
-            <div style={{ padding: '20px' }}>
-              <div style={{ fontSize: '12px', color: t.muted, marginBottom: '12px' }}>Charges profs</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', color: t.muted2 }}>Versé</span>
-                <span style={{ fontFamily: 'monospace', color: t.teal, fontWeight: '600' }}>{financier.chargesVersees.toFixed(0)}€</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: t.muted2 }}>Total dû</span>
-                <span style={{ fontFamily: 'monospace', color: t.text }}>{financier.chargesDues.toFixed(0)}€</span>
-              </div>
-              <div style={s.progressBar}>
-                <div style={{ height: '100%', borderRadius: '3px', background: t.purple, width: `${financier.chargesDues > 0 ? Math.min((financier.chargesVersees / financier.chargesDues) * 100, 100) : 0}%`, transition: 'width 0.5s' }} />
-              </div>
-              <div style={{ fontSize: '11px', color: t.muted, marginTop: '6px' }}>
-                {financier.chargesDues > 0 ? `${Math.round((financier.chargesVersees / financier.chargesDues) * 100)}% versé` : '—'}
-              </div>
-            </div>
+        <div style={card}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid ' + c.border }}>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: c.text }}>Apercu financier global</span>
           </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            {[
+              { label: 'Recettes eleves', recu: financier.recettesRecues, total: financier.recettesAttendues, color: c.teal, pct: financier.recettesAttendues > 0 ? Math.min((financier.recettesRecues / financier.recettesAttendues) * 100, 100) : 0, pctLabel: 'collecte' },
+              { label: 'Charges profs', recu: financier.chargesVersees, total: financier.chargesDues, color: c.purple, pct: financier.chargesDues > 0 ? Math.min((financier.chargesVersees / financier.chargesDues) * 100, 100) : 0, pctLabel: 'verse' },
+            ].map((f, i) => (
+              <div key={i} style={{ padding: '24px', borderRight: i === 0 ? '1px solid ' + c.border : 'none' }}>
+                <div style={{ fontSize: '11px', color: c.muted, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>{f.label}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '13px', color: c.muted2 }}>Recu / verse</span>
+                  <span style={{ fontFamily: 'monospace', color: f.color, fontWeight: '600' }}>{f.recu.toFixed(0)}EUR</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '13px', color: c.muted2 }}>Total</span>
+                  <span style={{ fontFamily: 'monospace', color: c.text }}>{f.total.toFixed(0)}EUR</span>
+                </div>
+                <div style={{ height: '4px', background: c.surface2, borderRadius: '2px', overflow: 'hidden', marginBottom: '8px' }}>
+                  <div style={{ height: '100%', borderRadius: '2px', background: f.color, width: f.pct + '%', transition: 'width 0.5s' }} />
+                </div>
+                <div style={{ fontSize: '11px', color: c.muted }}>
+                  {f.total > 0 ? Math.round(f.pct) + '% ' + f.pctLabel : '-'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Séparateur tricolore */}
+        <div style={{ display: 'flex', marginTop: '16px' }}>
+          <div style={{ height: '2px', flex: 3, background: isDark ? 'rgba(240,238,234,0.04)' : 'rgba(0,0,0,0.06)' }} />
+          <div style={{ height: '2px', flex: 1, background: 'rgba(155,142,196,0.3)' }} />
+          <div style={{ height: '2px', flex: 1, background: 'rgba(138,28,48,0.2)' }} />
         </div>
 
       </div>

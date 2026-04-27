@@ -1,9 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabase'
-import { t } from '../../../lib/theme'
+import { useTheme, getTheme } from '../../context/ThemeContext'
 
 export default function ElevesPage() {
+  const { theme, isDark } = useTheme()
+  const c = getTheme(theme)
+
   const [eleves, setEleves] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedEleve, setSelectedEleve] = useState(null)
@@ -17,17 +20,12 @@ export default function ElevesPage() {
   const [paiForm, setPaiForm] = useState({ montant: '', date_virement: '' })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [error, setError] = useState('')
   const [view, setView] = useState('list')
 
   useEffect(() => { fetchEleves(); fetchPacks() }, [])
 
   async function fetchEleves() {
-    const { data } = await supabase
-      .from('users')
-      .select('*, abonnements(pack_nom, statut, date_fin, montant)')
-      .eq('role', 'eleve')
-      .order('created_at', { ascending: false })
+    const { data } = await supabase.from('users').select('*, abonnements(pack_nom, statut, date_fin, montant)').eq('role', 'eleve').order('created_at', { ascending: false })
     setEleves(data || [])
     setLoading(false)
   }
@@ -41,46 +39,20 @@ export default function ElevesPage() {
     setSelectedEleve(eleve)
     setView('detail')
     setProfil(null)
-
-    const { data: aboData } = await supabase
-      .from('abonnements')
-      .select('*')
-      .eq('eleve_id', eleve.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
+    const { data: aboData } = await supabase.from('abonnements').select('*').eq('eleve_id', eleve.id).order('created_at', { ascending: false }).limit(1).single()
     setAbonnement(aboData || null)
-
     if (aboData) {
-      const { data: paiData } = await supabase
-        .from('paiements_eleves')
-        .select('*')
-        .eq('abonnement_id', aboData.id)
-        .order('date_virement', { ascending: false })
+      const { data: paiData } = await supabase.from('paiements_eleves').select('*').eq('abonnement_id', aboData.id).order('date_virement', { ascending: false })
       setPaiements(paiData || [])
-    } else {
-      setPaiements([])
-    }
-
-    const { data: profilData } = await supabase
-      .from('profils_eleves')
-      .select('*')
-      .eq('eleve_id', eleve.id)
-      .single()
+    } else { setPaiements([]) }
+    const { data: profilData } = await supabase.from('profils_eleves').select('*').eq('eleve_id', eleve.id).single()
     setProfil(profilData || null)
   }
 
   async function deleteEleve() {
     setDeleting(true)
-    // Supprimer dans la table users (le cascade supprimera les données liées)
     await supabase.from('users').delete().eq('id', selectedEleve.id)
-    // Supprimer dans auth (nécessite service role — via API)
-    await fetch('/api/delete-user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: selectedEleve.id })
-    })
+    await fetch('/api/delete-user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: selectedEleve.id }) })
     setDeleting(false)
     setShowDeleteConfirm(false)
     setView('list')
@@ -98,15 +70,7 @@ export default function ElevesPage() {
     e.preventDefault()
     setSaving(true)
     const ref = 'UNIVUP-' + selectedEleve.full_name.split(' ')[0].toUpperCase() + '-' + new Date().getFullYear()
-    const { data } = await supabase.from('abonnements').insert({
-      eleve_id: selectedEleve.id,
-      pack_nom: aboForm.pack_nom,
-      montant: parseFloat(aboForm.montant),
-      date_debut: aboForm.date_debut,
-      date_fin: aboForm.date_fin,
-      statut: 'en_attente',
-      reference_virement: ref
-    }).select().single()
+    const { data } = await supabase.from('abonnements').insert({ eleve_id: selectedEleve.id, pack_nom: aboForm.pack_nom, montant: parseFloat(aboForm.montant), date_debut: aboForm.date_debut, date_fin: aboForm.date_fin, statut: 'en_attente', reference_virement: ref }).select().single()
     setAbonnement(data)
     setAboForm({ pack_nom: '', montant: '', date_debut: '', date_fin: '' })
     setSaving(false)
@@ -116,14 +80,8 @@ export default function ElevesPage() {
     setSaving(true)
     const totalVerse = paiements.reduce((s, p) => s + parseFloat(p.montant), 0)
     const nouveauMontant = parseFloat(pack.prix)
-    await supabase.from('abonnements').update({
-      pack_nom: pack.nom,
-      montant: nouveauMontant,
-      statut: totalVerse >= nouveauMontant ? 'actif' : 'en_attente'
-    }).eq('id', abonnement.id)
-    if (totalVerse >= nouveauMontant) {
-      await supabase.from('users').update({ is_active: true }).eq('id', selectedEleve.id)
-    }
+    await supabase.from('abonnements').update({ pack_nom: pack.nom, montant: nouveauMontant, statut: totalVerse >= nouveauMontant ? 'actif' : 'en_attente' }).eq('id', abonnement.id)
+    if (totalVerse >= nouveauMontant) await supabase.from('users').update({ is_active: true }).eq('id', selectedEleve.id)
     setShowChangePack(false)
     setSaving(false)
     openEleve(selectedEleve)
@@ -133,12 +91,7 @@ export default function ElevesPage() {
     e.preventDefault()
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
-    await supabase.from('paiements_eleves').insert({
-      abonnement_id: abonnement.id,
-      montant: parseFloat(paiForm.montant),
-      date_virement: paiForm.date_virement,
-      valide_par: user.id
-    })
+    await supabase.from('paiements_eleves').insert({ abonnement_id: abonnement.id, montant: parseFloat(paiForm.montant), date_virement: paiForm.date_virement, valide_par: user.id })
     const newTotal = paiements.reduce((s, p) => s + parseFloat(p.montant), 0) + parseFloat(paiForm.montant)
     if (newTotal >= parseFloat(abonnement.montant)) {
       await supabase.from('abonnements').update({ statut: 'actif' }).eq('id', abonnement.id)
@@ -154,67 +107,54 @@ export default function ElevesPage() {
   const resteAPayer = abonnement ? parseFloat(abonnement.montant) - totalVerse : 0
 
   const STATUT = {
-    actif: { label: 'Actif', color: t.teal, bg: 'rgba(52,211,153,0.12)' },
-    en_attente: { label: 'En attente', color: t.amber, bg: 'rgba(251,191,36,0.1)' },
-    expire: { label: 'Expire', color: t.coral, bg: 'rgba(248,113,113,0.1)' },
+    actif: { label: 'Actif', color: c.teal, bg: isDark ? 'rgba(52,211,153,0.12)' : 'rgba(5,150,105,0.08)' },
+    en_attente: { label: 'En attente', color: c.amber, bg: isDark ? 'rgba(251,191,36,0.1)' : 'rgba(217,119,6,0.08)' },
+    expire: { label: 'Expire', color: c.coral, bg: isDark ? 'rgba(248,113,113,0.1)' : 'rgba(220,38,38,0.08)' },
   }
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid ' + t.border },
-    title: { fontSize: '18px', fontWeight: '600', color: t.text },
     btn: { padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
-    btnPrimary: { background: t.purple, color: '#1a1228' },
-    btnTeal: { background: t.teal, color: '#0d1f18' },
-    btnGhost: { background: 'rgba(255,255,255,0.06)', color: t.muted2, border: '1px solid ' + t.border },
-    btnDanger: { background: 'rgba(248,113,113,0.1)', color: t.coral, border: '1px solid rgba(248,113,113,0.2)' },
-    content: { padding: '24px 28px' },
-    card: { background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
-    cardHeader: { padding: '14px 20px', borderBottom: '1px solid ' + t.border, display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '13px', fontWeight: '600', color: t.text },
+    btnPrimary: { background: c.purple, color: isDark ? '#1a1228' : '#ffffff' },
+    btnTeal: { background: c.teal, color: isDark ? '#0d1f18' : '#ffffff' },
+    btnGhost: { background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: c.muted2, border: '1px solid ' + c.border },
+    btnDanger: { background: isDark ? 'rgba(248,113,113,0.1)' : 'rgba(220,38,38,0.06)', color: c.coral, border: '1px solid ' + (isDark ? 'rgba(248,113,113,0.2)' : 'rgba(220,38,38,0.15)') },
+    card: { background: c.surface, border: '1px solid ' + c.border, borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.04)' },
+    cardHeader: { padding: '14px 20px', borderBottom: '1px solid ' + c.border, display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    cardTitle: { fontSize: '13px', fontWeight: '600', color: c.text },
     cardBody: { padding: '20px' },
-    table: { width: '100%', borderCollapse: 'collapse' },
-    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid ' + t.border },
-    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: t.muted2 },
-    modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 },
-    modalBox: { background: t.surface, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px' },
-    label: { display: 'block', fontSize: '12px', color: t.muted2, marginBottom: '6px', marginTop: '14px' },
-    input: { width: '100%', padding: '9px 12px', background: t.surface2, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: t.text, fontSize: '13px', outline: 'none', boxSizing: 'border-box' },
-    row: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', gap: '12px' },
+    th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: c.muted, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid ' + c.border },
+    td: { padding: '12px 16px', borderBottom: '1px solid ' + c.border, fontSize: '13px', color: c.muted2 },
+    modal: { position: 'fixed', inset: 0, background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 },
+    label: { display: 'block', fontSize: '12px', color: c.muted2, marginBottom: '6px', marginTop: '14px' },
+    input: { width: '100%', padding: '9px 12px', background: c.surface2, border: '1px solid ' + c.border2, borderRadius: '8px', color: c.text, fontSize: '13px', outline: 'none', boxSizing: 'border-box' },
+    row: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid ' + c.border, fontSize: '13px', gap: '12px' },
   }
 
   if (view === 'list') return (
-    <div style={{ color: t.text }}>
-      <div style={s.topbar}>
-        <h1 style={s.title}>Eleves et abonnements</h1>
-        <div style={{ fontSize: '12px', color: t.muted }}>
-          Les eleves s'inscrivent eux-memes via la page d'inscription
-        </div>
+    <div style={{ color: c.text, background: c.bg, minHeight: '100vh', fontFamily: "'DM Sans', system-ui", transition: 'background 0.2s' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 32px', borderBottom: '1px solid ' + c.border, background: c.surface, transition: 'background 0.2s' }}>
+        <h1 style={{ fontSize: '20px', fontWeight: '700', color: c.text, letterSpacing: '-0.3px', margin: 0 }}>Eleves et abonnements</h1>
+        <div style={{ fontSize: '12px', color: c.muted }}>Les eleves s'inscrivent via la page d'inscription</div>
       </div>
-      <div style={s.content}>
+      <div style={{ padding: '28px 32px' }}>
         <div style={s.card}>
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Chargement...</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: c.muted }}>Chargement...</div>
           ) : eleves.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Aucun eleve inscrit pour le moment.</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: c.muted }}>Aucun eleve inscrit.</div>
           ) : (
-            <table style={s.table}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr>
-                  <th style={s.th}>Nom</th>
-                  <th style={s.th}>Email</th>
-                  <th style={s.th}>Pack</th>
-                  <th style={s.th}>Acces</th>
-                  <th style={s.th}>Actions</th>
-                </tr>
+                <tr>{['Nom', 'Email', 'Pack', 'Acces', 'Actions'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr>
               </thead>
               <tbody>
                 {eleves.map(eleve => (
                   <tr key={eleve.id} style={{ cursor: 'pointer' }} onClick={() => openEleve(eleve)}>
-                    <td style={{ ...s.td, color: t.text, fontWeight: '500' }}>{eleve.full_name}</td>
+                    <td style={{ ...s.td, color: c.text, fontWeight: '500' }}>{eleve.full_name}</td>
                     <td style={s.td}>{eleve.email}</td>
-                    <td style={s.td}>{eleve.abonnements?.[0]?.pack_nom || <span style={{ color: t.muted }}>-</span>}</td>
+                    <td style={s.td}>{eleve.abonnements?.[0]?.pack_nom || <span style={{ color: c.muted }}>-</span>}</td>
                     <td style={s.td}>
-                      <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: eleve.is_active ? 'rgba(52,211,153,0.12)' : 'rgba(248,113,113,0.1)', color: eleve.is_active ? t.teal : t.coral }}>
+                      <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: eleve.is_active ? STATUT.actif.bg : STATUT.expire.bg, color: eleve.is_active ? c.teal : c.coral }}>
                         {eleve.is_active ? 'Actif' : 'Inactif'}
                       </span>
                     </td>
@@ -234,54 +174,52 @@ export default function ElevesPage() {
   )
 
   return (
-    <div style={{ color: t.text }}>
-      <div style={s.topbar}>
+    <div style={{ color: c.text, background: c.bg, minHeight: '100vh', fontFamily: "'DM Sans', system-ui", transition: 'background 0.2s' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 32px', borderBottom: '1px solid ' + c.border, background: c.surface, transition: 'background 0.2s' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={() => { setView('list'); setSelectedEleve(null) }} style={{ ...s.btn, ...s.btnGhost, padding: '6px 10px' }}>Retour</button>
           <div>
-            <h1 style={s.title}>{selectedEleve?.full_name}</h1>
-            <div style={{ fontSize: '12px', color: t.muted, marginTop: '2px' }}>{selectedEleve?.email}</div>
+            <h1 style={{ fontSize: '20px', fontWeight: '700', color: c.text, letterSpacing: '-0.3px', margin: 0 }}>{selectedEleve?.full_name}</h1>
+            <div style={{ fontSize: '12px', color: c.muted, marginTop: '2px' }}>{selectedEleve?.email}</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => toggleAccess(selectedEleve.id, selectedEleve.is_active)} style={{ ...s.btn, ...(selectedEleve?.is_active ? s.btnGhost : s.btnTeal) }}>
             {selectedEleve?.is_active ? "Desactiver l'acces" : "Activer l'acces"}
           </button>
-          <button onClick={() => setShowDeleteConfirm(true)} style={{ ...s.btn, ...s.btnDanger }}>
-            Supprimer
-          </button>
+          <button onClick={() => setShowDeleteConfirm(true)} style={{ ...s.btn, ...s.btnDanger }}>Supprimer</button>
         </div>
       </div>
 
-      <div style={s.content}>
+      <div style={{ padding: '28px 32px' }}>
         <div style={s.card}>
           <div style={s.cardHeader}><span style={s.cardTitle}>Profil concours</span></div>
           <div style={s.cardBody}>
             {!profil ? (
-              <div style={{ fontSize: '12px', color: t.muted }}>Profil non encore renseigne par l'eleve.</div>
+              <div style={{ fontSize: '12px', color: c.muted }}>Profil non encore renseigne par l'eleve.</div>
             ) : (
               <>
-                <div style={s.row}><span style={{ color: t.muted, flexShrink: 0 }}>Universite</span><span style={{ color: t.text, fontWeight: '500', textAlign: 'right' }}>{profil.fac_origine || '-'}</span></div>
-                <div style={s.row}><span style={{ color: t.muted, flexShrink: 0 }}>Statut</span><span style={{ color: t.text }}>{profil.statut_etudiant || '-'}</span></div>
-                <div style={s.row}><span style={{ color: t.muted, flexShrink: 0 }}>Annee concours</span><span style={{ color: t.text }}>{profil.annee_concours || '-'}</span></div>
+                <div style={s.row}><span style={{ color: c.muted, flexShrink: 0 }}>Universite</span><span style={{ color: c.text, fontWeight: '500', textAlign: 'right' }}>{profil.fac_origine || '-'}</span></div>
+                <div style={s.row}><span style={{ color: c.muted, flexShrink: 0 }}>Statut</span><span style={{ color: c.text }}>{profil.statut_etudiant || '-'}</span></div>
+                <div style={s.row}><span style={{ color: c.muted, flexShrink: 0 }}>Annee concours</span><span style={{ color: c.text }}>{profil.annee_concours || '-'}</span></div>
                 <div style={s.row}>
-                  <span style={{ color: t.muted, flexShrink: 0 }}>Dominante Centrale</span>
-                  <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(167,139,250,0.12)', color: t.purple }}>{profil.dominante_centrale || '-'}</span>
+                  <span style={{ color: c.muted, flexShrink: 0 }}>Dominante Centrale</span>
+                  <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: isDark ? 'rgba(167,139,250,0.12)' : 'rgba(124,58,237,0.08)', color: c.purple }}>{profil.dominante_centrale || '-'}</span>
                 </div>
                 <div style={s.row}>
-                  <span style={{ color: t.muted, flexShrink: 0 }}>Ecoles cibles</span>
+                  <span style={{ color: c.muted, flexShrink: 0 }}>Ecoles cibles</span>
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {profil.ecoles_cibles?.length > 0 ? profil.ecoles_cibles.map(e => (
-                      <span key={e} style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '10px', background: 'rgba(96,165,250,0.12)', color: t.blue }}>{e}</span>
-                    )) : <span style={{ color: t.muted }}>-</span>}
+                      <span key={e} style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '10px', background: isDark ? 'rgba(96,165,250,0.12)' : 'rgba(37,99,235,0.08)', color: c.blue }}>{e}</span>
+                    )) : <span style={{ color: c.muted }}>-</span>}
                   </div>
                 </div>
                 <div style={{ ...s.row, borderBottom: 'none' }}>
-                  <span style={{ color: t.muted, flexShrink: 0 }}>Ecoles GEI</span>
+                  <span style={{ color: c.muted, flexShrink: 0 }}>Ecoles GEI</span>
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {profil.ecoles_gei?.length > 0 ? profil.ecoles_gei.map(e => (
-                      <span key={e} style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '10px', background: 'rgba(251,191,36,0.12)', color: t.amber }}>{e}</span>
-                    )) : <span style={{ color: t.muted }}>-</span>}
+                      <span key={e} style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '10px', background: isDark ? 'rgba(251,191,36,0.12)' : 'rgba(217,119,6,0.08)', color: c.amber }}>{e}</span>
+                    )) : <span style={{ color: c.muted }}>-</span>}
                   </div>
                 </div>
               </>
@@ -293,22 +231,14 @@ export default function ElevesPage() {
           <div style={s.card}>
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Abonnement</span>
-              {abonnement && (
-                <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: STATUT[abonnement.statut]?.bg, color: STATUT[abonnement.statut]?.color }}>
-                  {STATUT[abonnement.statut]?.label}
-                </span>
-              )}
+              {abonnement && <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: STATUT[abonnement.statut]?.bg, color: STATUT[abonnement.statut]?.color }}>{STATUT[abonnement.statut]?.label}</span>}
             </div>
             <div style={s.cardBody}>
               {!abonnement ? (
                 <form onSubmit={createAbonnement}>
-                  <div style={{ color: t.muted, fontSize: '12px', marginBottom: '16px' }}>Aucun abonnement.</div>
+                  <div style={{ color: c.muted, fontSize: '12px', marginBottom: '16px' }}>Aucun abonnement.</div>
                   <label style={{ ...s.label, marginTop: 0 }}>Pack</label>
-                  <select style={{ ...s.input, cursor: 'pointer' }} value={aboForm.pack_nom}
-                    onChange={e => {
-                      const pack = packs.find(p => p.nom === e.target.value)
-                      setAboForm({ ...aboForm, pack_nom: e.target.value, montant: pack ? pack.prix : aboForm.montant })
-                    }} required>
+                  <select style={{ ...s.input, cursor: 'pointer' }} value={aboForm.pack_nom} onChange={e => { const pack = packs.find(p => p.nom === e.target.value); setAboForm({ ...aboForm, pack_nom: e.target.value, montant: pack ? pack.prix : aboForm.montant }) }} required>
                     <option value="">Choisir un pack</option>
                     {packs.map(p => <option key={p.id} value={p.nom}>{p.nom} - {p.prix}EUR</option>)}
                   </select>
@@ -318,28 +248,22 @@ export default function ElevesPage() {
                   <input style={s.input} type="date" value={aboForm.date_debut} onChange={e => setAboForm({ ...aboForm, date_debut: e.target.value })} required />
                   <label style={s.label}>Date fin</label>
                   <input style={s.input} type="date" value={aboForm.date_fin} onChange={e => setAboForm({ ...aboForm, date_fin: e.target.value })} required />
-                  <button type="submit" style={{ ...s.btn, ...s.btnPrimary, marginTop: '16px', width: '100%' }} disabled={saving}>
-                    {saving ? 'Creation...' : "Creer l'abonnement"}
-                  </button>
+                  <button type="submit" style={{ ...s.btn, ...s.btnPrimary, marginTop: '16px', width: '100%' }} disabled={saving}>{saving ? 'Creation...' : "Creer l'abonnement"}</button>
                 </form>
               ) : (
                 <>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: t.purple, marginBottom: '16px' }}>{abonnement.pack_nom}</div>
-                  <div style={s.row}><span style={{ color: t.muted }}>Montant total</span><span style={{ fontFamily: 'monospace' }}>{abonnement.montant}EUR</span></div>
-                  <div style={s.row}><span style={{ color: t.muted }}>Verse</span><span style={{ fontFamily: 'monospace', color: t.teal }}>{totalVerse.toFixed(2)}EUR</span></div>
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: c.purple, marginBottom: '16px' }}>{abonnement.pack_nom}</div>
+                  <div style={s.row}><span style={{ color: c.muted }}>Montant total</span><span style={{ fontFamily: 'monospace' }}>{abonnement.montant}EUR</span></div>
+                  <div style={s.row}><span style={{ color: c.muted }}>Verse</span><span style={{ fontFamily: 'monospace', color: c.teal }}>{totalVerse.toFixed(2)}EUR</span></div>
                   <div style={{ ...s.row, borderBottom: 'none' }}>
-                    <span style={{ color: t.muted }}>Reste</span>
-                    <span style={{ fontFamily: 'monospace', color: resteAPayer > 0 ? t.amber : t.teal }}>
-                      {resteAPayer > 0 ? resteAPayer.toFixed(2) + 'EUR' : 'Solde'}
-                    </span>
+                    <span style={{ color: c.muted }}>Reste</span>
+                    <span style={{ fontFamily: 'monospace', color: resteAPayer > 0 ? c.amber : c.teal }}>{resteAPayer > 0 ? resteAPayer.toFixed(2) + 'EUR' : 'Solde'}</span>
                   </div>
-                  <div style={{ marginTop: '14px', padding: '10px 12px', background: t.surface2, borderRadius: '8px' }}>
-                    <div style={{ fontSize: '10px', color: t.muted, marginBottom: '4px' }}>Reference virement</div>
-                    <div style={{ fontFamily: 'monospace', color: t.purple, fontSize: '14px' }}>{abonnement.reference_virement}</div>
+                  <div style={{ marginTop: '14px', padding: '10px 12px', background: c.surface2, borderRadius: '8px' }}>
+                    <div style={{ fontSize: '10px', color: c.muted, marginBottom: '4px' }}>Reference virement</div>
+                    <div style={{ fontFamily: 'monospace', color: c.purple, fontSize: '14px' }}>{abonnement.reference_virement}</div>
                   </div>
-                  <button onClick={() => setShowChangePack(true)} style={{ ...s.btn, ...s.btnGhost, marginTop: '12px', width: '100%', fontSize: '12px' }}>
-                    Changer de pack
-                  </button>
+                  <button onClick={() => setShowChangePack(true)} style={{ ...s.btn, ...s.btnGhost, marginTop: '12px', width: '100%', fontSize: '12px' }}>Changer de pack</button>
                 </>
               )}
             </div>
@@ -354,12 +278,8 @@ export default function ElevesPage() {
                   <input style={s.input} type="number" step="0.01" value={paiForm.montant} onChange={e => setPaiForm({ ...paiForm, montant: e.target.value })} required placeholder={'Max: ' + resteAPayer.toFixed(2)} />
                   <label style={s.label}>Date du virement</label>
                   <input style={s.input} type="date" value={paiForm.date_virement} onChange={e => setPaiForm({ ...paiForm, date_virement: e.target.value })} required />
-                  <button type="submit" style={{ ...s.btn, ...s.btnTeal, marginTop: '16px', width: '100%' }} disabled={saving}>
-                    {saving ? 'Enregistrement...' : 'Confirmer le virement'}
-                  </button>
-                  <div style={{ fontSize: '11px', color: t.muted, marginTop: '8px', textAlign: 'center' }}>
-                    Si le total atteint {abonnement.montant}EUR, l'acces sera active automatiquement.
-                  </div>
+                  <button type="submit" style={{ ...s.btn, ...s.btnTeal, marginTop: '16px', width: '100%' }} disabled={saving}>{saving ? 'Enregistrement...' : 'Confirmer le virement'}</button>
+                  <div style={{ fontSize: '11px', color: c.muted, marginTop: '8px', textAlign: 'center' }}>Si le total atteint {abonnement.montant}EUR, l'acces sera active automatiquement.</div>
                 </form>
               </div>
             </div>
@@ -370,20 +290,18 @@ export default function ElevesPage() {
           <div style={s.card}>
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Historique des paiements</span>
-              <span style={{ fontSize: '11px', color: t.muted }}>{paiements.length} virement{paiements.length > 1 ? 's' : ''}</span>
+              <span style={{ fontSize: '11px', color: c.muted }}>{paiements.length} virement{paiements.length > 1 ? 's' : ''}</span>
             </div>
             {paiements.length === 0 ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: t.muted, fontSize: '13px' }}>Aucun paiement enregistre.</div>
+              <div style={{ padding: '24px', textAlign: 'center', color: c.muted, fontSize: '13px' }}>Aucun paiement enregistre.</div>
             ) : (
-              <table style={s.table}>
-                <thead>
-                  <tr>{['Date', 'Montant', 'Valide par'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr>
-                </thead>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead><tr>{['Date', 'Montant', 'Valide par'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
                 <tbody>
                   {paiements.map(p => (
                     <tr key={p.id}>
                       <td style={s.td}>{new Date(p.date_virement).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</td>
-                      <td style={{ ...s.td, color: t.teal, fontFamily: 'monospace', fontWeight: '600' }}>+{p.montant}EUR</td>
+                      <td style={{ ...s.td, color: c.teal, fontFamily: 'monospace', fontWeight: '600' }}>+{p.montant}EUR</td>
                       <td style={s.td}>Admin</td>
                     </tr>
                   ))}
@@ -394,22 +312,16 @@ export default function ElevesPage() {
         )}
       </div>
 
-      {/* Modale confirmation suppression */}
+      {/* Modale suppression */}
       {showDeleteConfirm && (
         <div style={s.modal} onClick={() => setShowDeleteConfirm(false)}>
-          <div style={s.modalBox} onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: t.coral, fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Supprimer cet eleve ?</h2>
-            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '8px', lineHeight: 1.6 }}>
-              Tu es sur le point de supprimer <strong style={{ color: t.text }}>{selectedEleve?.full_name}</strong>.
-            </p>
-            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '24px', lineHeight: 1.6 }}>
-              Cette action supprimera son compte, ses resultats, son abonnement et toutes ses donnees. Elle est irreversible.
-            </p>
+          <div style={{ background: c.surface, border: '1px solid ' + c.border, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ color: c.coral, fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Supprimer cet eleve ?</h2>
+            <p style={{ fontSize: '13px', color: c.muted, marginBottom: '8px', lineHeight: 1.6 }}>Tu es sur le point de supprimer <strong style={{ color: c.text }}>{selectedEleve?.full_name}</strong>.</p>
+            <p style={{ fontSize: '13px', color: c.muted, marginBottom: '24px', lineHeight: 1.6 }}>Cette action supprimera son compte, ses resultats, son abonnement et toutes ses donnees. Elle est irreversible.</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowDeleteConfirm(false)} style={{ ...s.btn, ...s.btnGhost, flex: 1 }}>Annuler</button>
-              <button onClick={deleteEleve} disabled={deleting} style={{ ...s.btn, background: t.coral, color: '#fff', border: 'none', flex: 1, cursor: deleting ? 'not-allowed' : 'pointer' }}>
-                {deleting ? 'Suppression...' : 'Confirmer la suppression'}
-              </button>
+              <button onClick={deleteEleve} disabled={deleting} style={{ ...s.btn, background: c.coral, color: '#fff', border: 'none', flex: 1, cursor: deleting ? 'not-allowed' : 'pointer' }}>{deleting ? 'Suppression...' : 'Confirmer'}</button>
             </div>
           </div>
         </div>
@@ -418,27 +330,22 @@ export default function ElevesPage() {
       {/* Modale changement de pack */}
       {showChangePack && (
         <div style={s.modal} onClick={() => setShowChangePack(false)}>
-          <div style={{ background: t.surface, border: '1px solid ' + t.border2, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '500px', maxHeight: '80vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: t.text, fontSize: '16px', fontWeight: '600', marginBottom: '6px' }}>Changer de pack</h2>
-            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '6px', lineHeight: 1.6 }}>
-              Pack actuel : <strong style={{ color: t.text }}>{abonnement?.pack_nom}</strong> ({abonnement?.montant}EUR)
-            </p>
-            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
-              Deja verse : <strong style={{ color: t.teal }}>{totalVerse.toFixed(2)}EUR</strong>
-            </p>
+          <div style={{ background: c.surface, border: '1px solid ' + c.border, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '500px', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ color: c.text, fontSize: '16px', fontWeight: '600', marginBottom: '6px' }}>Changer de pack</h2>
+            <p style={{ fontSize: '13px', color: c.muted, marginBottom: '6px', lineHeight: 1.6 }}>Pack actuel : <strong style={{ color: c.text }}>{abonnement?.pack_nom}</strong> ({abonnement?.montant}EUR)</p>
+            <p style={{ fontSize: '13px', color: c.muted, marginBottom: '20px', lineHeight: 1.6 }}>Deja verse : <strong style={{ color: c.teal }}>{totalVerse.toFixed(2)}EUR</strong></p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {packs.map(pack => {
                 const nouveauReste = parseFloat(pack.prix) - totalVerse
                 return (
-                  <div key={pack.id} onClick={() => changerPack(pack)}
-                    style={{ background: t.surface2, border: '1px solid ' + t.border, borderRadius: '10px', padding: '16px', cursor: 'pointer' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = t.purple}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
+                  <div key={pack.id} onClick={() => changerPack(pack)} style={{ background: c.surface2, border: '1px solid ' + c.border, borderRadius: '10px', padding: '16px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = c.purple}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = c.border}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: '500', color: t.text }}>{pack.nom}</div>
-                      <div style={{ fontSize: '18px', fontWeight: '700', color: t.purple }}>{pack.prix}EUR</div>
+                      <div style={{ fontSize: '14px', fontWeight: '500', color: c.text }}>{pack.nom}</div>
+                      <div style={{ fontSize: '18px', fontWeight: '700', color: c.purple }}>{pack.prix}EUR</div>
                     </div>
-                    <div style={{ fontSize: '12px', color: nouveauReste > 0 ? t.amber : t.teal }}>
+                    <div style={{ fontSize: '12px', color: nouveauReste > 0 ? c.amber : c.teal }}>
                       {nouveauReste > 0 ? 'Reste a payer apres changement : ' + nouveauReste.toFixed(2) + 'EUR' : 'Deja paye — sera marque comme solde'}
                     </div>
                   </div>

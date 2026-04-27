@@ -4,9 +4,12 @@ import { supabase } from '../../lib/supabase'
 import AdminSidebar from '../admin/sidebar'
 import ProfSidebar from '../prof/sidebar'
 import EleveSidebar from '../eleve/sidebar'
+import { useTheme, getTheme } from '../context/ThemeContext'
 
 export default function ChatLayout({ children }) {
   const [role, setRole] = useState(null)
+  const { theme } = useTheme()
+  const c = getTheme(theme)
 
   useEffect(() => {
     async function getRole() {
@@ -21,7 +24,7 @@ export default function ChatLayout({ children }) {
   const Sidebar = role === 'admin' ? AdminSidebar : role === 'prof' ? ProfSidebar : EleveSidebar
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', background: '#0f0f11' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'DM Sans', system-ui, sans-serif", background: c.bg, transition: 'background 0.2s' }}>
       {role && <Sidebar />}
       <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         {children}

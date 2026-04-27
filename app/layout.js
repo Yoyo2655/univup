@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { t } from '../lib/theme'
+import { ThemeProvider } from './context/ThemeContext'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,16 +14,17 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "UnivUp",
-  description: "Préparation aux concours des grandes écoles d'ingénieurs par la voie des admissions parallèles",
+  description: "Preparation aux concours des grandes ecoles d'ingenieurs par la voie des admissions paralleles",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
