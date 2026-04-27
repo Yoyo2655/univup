@@ -11,6 +11,7 @@ export default function AdminSidebar() {
     { href: '/admin', label: 'Tableau de bord', icon: '📊' },
     { href: '/admin/planning', label: 'Planning global', icon: '📅' },
     { href: '/admin/eleves', label: 'Eleves', icon: '👥' },
+    { href: '/admin/suivi', label: 'Suivi eleves', icon: '📈' },
     { href: '/admin/salaires', label: 'Professeurs', icon: '💶' },
     { href: '/admin/packs', label: 'Packs & Abonnements', icon: '📦' },
     { href: '/chat', label: 'Chat', icon: '💬' },
