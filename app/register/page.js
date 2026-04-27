@@ -1,38 +1,40 @@
 'use client'
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [role, setRole] = useState('eleve')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  async function handleLogin(e) {
+  async function handleRegister(e) {
     e.preventDefault()
+    if (password !== confirm) { setError('Les mots de passe ne correspondent pas'); return }
+    if (password.length < 6) { setError('Minimum 6 caracteres'); return }
     setLoading(true)
     setError('')
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
+    if (signUpError) { setError(signUpError.message); setLoading(false); return }
 
-    if (error) {
-      setError('Email ou mot de passe incorrect')
-      setLoading(false)
-      return
-    }
+    const { error: dbError } = await supabase.from('users').insert({
+      id: data.user.id,
+      email,
+      full_name: fullName,
+      role,
+      is_active: false
+    })
 
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
+    if (dbError) { setError(dbError.message); setLoading(false); return }
 
-    if (userData?.role === 'admin') router.push('/admin')
-    else if (userData?.role === 'prof') router.push('/prof')
-    else if (userData?.role === 'eleve') router.push('/eleve')
+    router.push(role === 'prof' ? '/prof' : '/eleve')
   }
 
   return (
@@ -44,7 +46,6 @@ export default function LoginPage() {
       position: 'relative',
       overflow: 'hidden',
     }}>
-
       {/* Panneau gauche */}
       <div style={{
         width: '420px',
@@ -79,11 +80,12 @@ export default function LoginPage() {
             <div style={{ height: '3px', width: '48px', background: '#8a1c30' }} />
           </div>
           <p style={{ fontSize: '22px', fontWeight: '300', color: '#f0eeea', lineHeight: 1.4, letterSpacing: '-0.3px', marginBottom: '16px' }}>
-            Prepare ton concours.<br />
-            <span style={{ color: '#9b8ec4', fontWeight: '500' }}>Suis ta progression.</span>
+            Rejoins UnivUp.<br />
+            <span style={{ color: '#9b8ec4', fontWeight: '500' }}>Prepare ton concours.</span>
           </p>
           <p style={{ fontSize: '13px', color: '#4a4847', lineHeight: 1.6 }}>
-            Kholles, planning, resultats —<br />tout au meme endroit.
+            Cree ton compte gratuitement.<br />
+            Ton acces sera active apres confirmation.
           </p>
         </div>
 
@@ -102,14 +104,51 @@ export default function LoginPage() {
 
         <div style={{ width: '100%', maxWidth: '360px', position: 'relative', zIndex: 1 }}>
           <h2 style={{ fontSize: '26px', fontWeight: '700', color: '#f0eeea', letterSpacing: '-0.5px', marginBottom: '6px' }}>
-            Connexion
+            Creer mon compte
           </h2>
           <p style={{ fontSize: '13px', color: '#4a4847', marginBottom: '36px' }}>
-            Accede a ton espace personnel
+            Remplis les informations ci-dessous
           </p>
 
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '18px' }}>
+          <form onSubmit={handleRegister}>
+
+            {/* Role */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                Je suis
+              </label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {['eleve', 'prof'].map(r => (
+                  <div
+                    key={r}
+                    onClick={() => setRole(r)}
+                    style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', border: role === r ? '1px solid rgba(155,142,196,0.5)' : '1px solid rgba(255,255,255,0.08)', background: role === r ? 'rgba(155,142,196,0.1)' : 'rgba(255,255,255,0.04)', color: role === r ? '#9b8ec4' : '#6e6c66', transition: 'all 0.15s' }}
+                  >
+                    {r === 'eleve' ? 'Un eleve' : 'Un professeur'}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Nom */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                Nom complet
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
+                required
+                placeholder="Prenom Nom"
+                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+              />
+            </div>
+
+            {/* Email */}
+            <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
                 Email
               </label>
@@ -119,13 +158,14 @@ export default function LoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 placeholder="ton@email.com"
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s', fontFamily: 'inherit' }}
+                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                 onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
               />
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
+            {/* Mot de passe */}
+            <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
                 Mot de passe
               </label>
@@ -134,8 +174,25 @@ export default function LoginPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                placeholder="••••••••"
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s', fontFamily: 'inherit' }}
+                placeholder="Min. 6 caracteres"
+                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+              />
+            </div>
+
+            {/* Confirmer */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                Confirmer le mot de passe
+              </label>
+              <input
+                type="password"
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                required
+                placeholder="Retape ton mot de passe"
+                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                 onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
               />
@@ -154,18 +211,20 @@ export default function LoginPage() {
               onMouseEnter={e => { if (!loading) e.target.style.background = '#ffffff' }}
               onMouseLeave={e => { if (!loading) e.target.style.background = '#f0eeea' }}
             >
-              {loading ? 'Connexion en cours...' : 'Se connecter'}
+              {loading ? 'Creation...' : 'Creer mon compte'}
             </button>
           </form>
 
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <span style={{ fontSize: '13px', color: '#4a4847' }}>Pas encore de compte ? </span>
-            <Link href="/register" style={{ fontSize: '13px', color: '#9b8ec4', textDecoration: 'none', fontWeight: '500' }}>
-              Creer mon compte
-            </Link>
+            <span style={{ fontSize: '13px', color: '#4a4847' }}>Deja un compte ? </span>
+            <Link href="/" style={{ fontSize: '13px', color: '#9b8ec4', textDecoration: 'none', fontWeight: '500' }}>Se connecter</Link>
           </div>
 
-          <div style={{ display: 'flex', marginTop: '36px' }}>
+          <div style={{ fontSize: '11px', color: '#2e2d2b', textAlign: 'center', marginTop: '16px', lineHeight: 1.6 }}>
+            Ton acces sera active manuellement par UnivUp apres confirmation.
+          </div>
+
+          <div style={{ display: 'flex', marginTop: '28px' }}>
             <div style={{ height: '2px', flex: 3, background: 'rgba(240,238,234,0.08)' }} />
             <div style={{ height: '2px', flex: 1, background: 'rgba(155,142,196,0.3)' }} />
             <div style={{ height: '2px', flex: 1, background: 'rgba(138,28,48,0.3)' }} />

@@ -6,17 +6,17 @@ import { t } from '../../../lib/theme'
 export default function ElevesPage() {
   const [eleves, setEleves] = useState([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
   const [selectedEleve, setSelectedEleve] = useState(null)
   const [abonnement, setAbonnement] = useState(null)
   const [paiements, setPaiements] = useState([])
   const [profil, setProfil] = useState(null)
   const [packs, setPacks] = useState([])
   const [showChangePack, setShowChangePack] = useState(false)
-  const [form, setForm] = useState({ full_name: '', email: '', password: '' })
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [aboForm, setAboForm] = useState({ pack_nom: '', montant: '', date_debut: '', date_fin: '' })
   const [paiForm, setPaiForm] = useState({ montant: '', date_virement: '' })
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [view, setView] = useState('list')
 
@@ -71,21 +71,21 @@ export default function ElevesPage() {
     setProfil(profilData || null)
   }
 
-  async function createEleve(e) {
-    e.preventDefault()
-    setSaving(true)
-    setError('')
-    const res = await fetch('/api/create-user', {
+  async function deleteEleve() {
+    setDeleting(true)
+    // Supprimer dans la table users (le cascade supprimera les données liées)
+    await supabase.from('users').delete().eq('id', selectedEleve.id)
+    // Supprimer dans auth (nécessite service role — via API)
+    await fetch('/api/delete-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, role: 'eleve' })
+      body: JSON.stringify({ userId: selectedEleve.id })
     })
-    const data = await res.json()
-    if (data.error) { setError(data.error); setSaving(false); return }
-    setForm({ full_name: '', email: '', password: '' })
-    setShowForm(false)
+    setDeleting(false)
+    setShowDeleteConfirm(false)
+    setView('list')
+    setSelectedEleve(null)
     fetchEleves()
-    setSaving(false)
   }
 
   async function toggleAccess(id, current) {
@@ -116,18 +116,14 @@ export default function ElevesPage() {
     setSaving(true)
     const totalVerse = paiements.reduce((s, p) => s + parseFloat(p.montant), 0)
     const nouveauMontant = parseFloat(pack.prix)
-    // Le nouveau montant du = prix du nouveau pack
-    // Ce qui reste = nouveau montant - ce qui a déjà été versé
     await supabase.from('abonnements').update({
       pack_nom: pack.nom,
       montant: nouveauMontant,
       statut: totalVerse >= nouveauMontant ? 'actif' : 'en_attente'
     }).eq('id', abonnement.id)
-
     if (totalVerse >= nouveauMontant) {
       await supabase.from('users').update({ is_active: true }).eq('id', selectedEleve.id)
     }
-
     setShowChangePack(false)
     setSaving(false)
     openEleve(selectedEleve)
@@ -170,6 +166,7 @@ export default function ElevesPage() {
     btnPrimary: { background: t.purple, color: '#1a1228' },
     btnTeal: { background: t.teal, color: '#0d1f18' },
     btnGhost: { background: 'rgba(255,255,255,0.06)', color: t.muted2, border: '1px solid ' + t.border },
+    btnDanger: { background: 'rgba(248,113,113,0.1)', color: t.coral, border: '1px solid rgba(248,113,113,0.2)' },
     content: { padding: '24px 28px' },
     card: { background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', overflow: 'hidden', marginBottom: '16px' },
     cardHeader: { padding: '14px 20px', borderBottom: '1px solid ' + t.border, display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
@@ -189,14 +186,16 @@ export default function ElevesPage() {
     <div style={{ color: t.text }}>
       <div style={s.topbar}>
         <h1 style={s.title}>Eleves et abonnements</h1>
-        <button style={{ ...s.btn, ...s.btnPrimary }} onClick={() => setShowForm(true)}>+ Creer un eleve</button>
+        <div style={{ fontSize: '12px', color: t.muted }}>
+          Les eleves s'inscrivent eux-memes via la page d'inscription
+        </div>
       </div>
       <div style={s.content}>
         <div style={s.card}>
           {loading ? (
             <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Chargement...</div>
           ) : eleves.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Aucun eleve.</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Aucun eleve inscrit pour le moment.</div>
           ) : (
             <table style={s.table}>
               <thead>
@@ -231,27 +230,6 @@ export default function ElevesPage() {
           )}
         </div>
       </div>
-
-      {showForm && (
-        <div style={s.modal} onClick={() => setShowForm(false)}>
-          <div style={s.modalBox} onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: t.text, fontSize: '16px', fontWeight: '600', marginBottom: '20px' }}>Creer un eleve</h2>
-            <form onSubmit={createEleve}>
-              <label style={s.label}>Nom complet</label>
-              <input style={s.input} value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required placeholder="Prenom Nom" />
-              <label style={s.label}>Email</label>
-              <input style={s.input} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required placeholder="eleve@email.com" />
-              <label style={s.label}>Mot de passe provisoire</label>
-              <input style={s.input} type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required minLength={6} placeholder="Min. 6 caracteres" />
-              {error && <div style={{ color: t.coral, fontSize: '12px', margin: '12px 0' }}>{error}</div>}
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" style={{ ...s.btn, ...s.btnGhost }} onClick={() => setShowForm(false)}>Annuler</button>
-                <button type="submit" style={{ ...s.btn, ...s.btnPrimary }} disabled={saving}>{saving ? 'Creation...' : 'Creer'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 
@@ -265,13 +243,17 @@ export default function ElevesPage() {
             <div style={{ fontSize: '12px', color: t.muted, marginTop: '2px' }}>{selectedEleve?.email}</div>
           </div>
         </div>
-        <button onClick={() => toggleAccess(selectedEleve.id, selectedEleve.is_active)} style={{ ...s.btn, ...(selectedEleve?.is_active ? s.btnGhost : s.btnTeal) }}>
-          {selectedEleve?.is_active ? "Desactiver l'acces" : "Activer l'acces"}
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => toggleAccess(selectedEleve.id, selectedEleve.is_active)} style={{ ...s.btn, ...(selectedEleve?.is_active ? s.btnGhost : s.btnTeal) }}>
+            {selectedEleve?.is_active ? "Desactiver l'acces" : "Activer l'acces"}
+          </button>
+          <button onClick={() => setShowDeleteConfirm(true)} style={{ ...s.btn, ...s.btnDanger }}>
+            Supprimer
+          </button>
+        </div>
       </div>
 
       <div style={s.content}>
-
         <div style={s.card}>
           <div style={s.cardHeader}><span style={s.cardTitle}>Profil concours</span></div>
           <div style={s.cardBody}>
@@ -308,7 +290,6 @@ export default function ElevesPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-
           <div style={s.card}>
             <div style={s.cardHeader}>
               <span style={s.cardTitle}>Abonnement</span>
@@ -323,19 +304,13 @@ export default function ElevesPage() {
                 <form onSubmit={createAbonnement}>
                   <div style={{ color: t.muted, fontSize: '12px', marginBottom: '16px' }}>Aucun abonnement.</div>
                   <label style={{ ...s.label, marginTop: 0 }}>Pack</label>
-                  <select
-                    style={{ ...s.input, cursor: 'pointer' }}
-                    value={aboForm.pack_nom}
+                  <select style={{ ...s.input, cursor: 'pointer' }} value={aboForm.pack_nom}
                     onChange={e => {
                       const pack = packs.find(p => p.nom === e.target.value)
                       setAboForm({ ...aboForm, pack_nom: e.target.value, montant: pack ? pack.prix : aboForm.montant })
-                    }}
-                    required
-                  >
+                    }} required>
                     <option value="">Choisir un pack</option>
-                    {packs.map(p => (
-                      <option key={p.id} value={p.nom}>{p.nom} - {p.prix}EUR</option>
-                    ))}
+                    {packs.map(p => <option key={p.id} value={p.nom}>{p.nom} - {p.prix}EUR</option>)}
                   </select>
                   <label style={s.label}>Montant total (EUR)</label>
                   <input style={s.input} type="number" value={aboForm.montant} onChange={e => setAboForm({ ...aboForm, montant: e.target.value })} required placeholder="Rempli automatiquement" />
@@ -362,10 +337,7 @@ export default function ElevesPage() {
                     <div style={{ fontSize: '10px', color: t.muted, marginBottom: '4px' }}>Reference virement</div>
                     <div style={{ fontFamily: 'monospace', color: t.purple, fontSize: '14px' }}>{abonnement.reference_virement}</div>
                   </div>
-                  <button
-                    onClick={() => setShowChangePack(true)}
-                    style={{ ...s.btn, ...s.btnGhost, marginTop: '12px', width: '100%', fontSize: '12px' }}
-                  >
+                  <button onClick={() => setShowChangePack(true)} style={{ ...s.btn, ...s.btnGhost, marginTop: '12px', width: '100%', fontSize: '12px' }}>
                     Changer de pack
                   </button>
                 </>
@@ -422,6 +394,27 @@ export default function ElevesPage() {
         )}
       </div>
 
+      {/* Modale confirmation suppression */}
+      {showDeleteConfirm && (
+        <div style={s.modal} onClick={() => setShowDeleteConfirm(false)}>
+          <div style={s.modalBox} onClick={e => e.stopPropagation()}>
+            <h2 style={{ color: t.coral, fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Supprimer cet eleve ?</h2>
+            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '8px', lineHeight: 1.6 }}>
+              Tu es sur le point de supprimer <strong style={{ color: t.text }}>{selectedEleve?.full_name}</strong>.
+            </p>
+            <p style={{ fontSize: '13px', color: t.muted, marginBottom: '24px', lineHeight: 1.6 }}>
+              Cette action supprimera son compte, ses resultats, son abonnement et toutes ses donnees. Elle est irreversible.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setShowDeleteConfirm(false)} style={{ ...s.btn, ...s.btnGhost, flex: 1 }}>Annuler</button>
+              <button onClick={deleteEleve} disabled={deleting} style={{ ...s.btn, background: t.coral, color: '#fff', border: 'none', flex: 1, cursor: deleting ? 'not-allowed' : 'pointer' }}>
+                {deleting ? 'Suppression...' : 'Confirmer la suppression'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modale changement de pack */}
       {showChangePack && (
         <div style={s.modal} onClick={() => setShowChangePack(false)}>
@@ -433,35 +426,26 @@ export default function ElevesPage() {
             <p style={{ fontSize: '13px', color: t.muted, marginBottom: '20px', lineHeight: 1.6 }}>
               Deja verse : <strong style={{ color: t.teal }}>{totalVerse.toFixed(2)}EUR</strong>
             </p>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {packs.map(pack => {
                 const nouveauReste = parseFloat(pack.prix) - totalVerse
                 return (
-                  <div
-                    key={pack.id}
-                    onClick={() => changerPack(pack)}
+                  <div key={pack.id} onClick={() => changerPack(pack)}
                     style={{ background: t.surface2, border: '1px solid ' + t.border, borderRadius: '10px', padding: '16px', cursor: 'pointer' }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = t.purple}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = t.border}
-                  >
+                    onMouseLeave={e => e.currentTarget.style.borderColor = t.border}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                       <div style={{ fontSize: '14px', fontWeight: '500', color: t.text }}>{pack.nom}</div>
                       <div style={{ fontSize: '18px', fontWeight: '700', color: t.purple }}>{pack.prix}EUR</div>
                     </div>
                     <div style={{ fontSize: '12px', color: nouveauReste > 0 ? t.amber : t.teal }}>
-                      {nouveauReste > 0
-                        ? 'Reste a payer apres changement : ' + nouveauReste.toFixed(2) + 'EUR'
-                        : 'Deja paye — sera marque comme solde'}
+                      {nouveauReste > 0 ? 'Reste a payer apres changement : ' + nouveauReste.toFixed(2) + 'EUR' : 'Deja paye — sera marque comme solde'}
                     </div>
                   </div>
                 )
               })}
             </div>
-
-            <button onClick={() => setShowChangePack(false)} style={{ ...s.btn, ...s.btnGhost, marginTop: '16px', width: '100%' }}>
-              Annuler
-            </button>
+            <button onClick={() => setShowChangePack(false)} style={{ ...s.btn, ...s.btnGhost, marginTop: '16px', width: '100%' }}>Annuler</button>
           </div>
         </div>
       )}
