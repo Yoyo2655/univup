@@ -1,9 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { t } from '../../../lib/theme'
+import { useTheme, getTheme } from '../../context/ThemeContext'
 import AccesProtege from '../AccesProtege'
 
 export default function BiblioPage() {
+  const { theme, isDark } = useTheme()
+  const c = getTheme(theme)
+
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentFolder, setCurrentFolder] = useState(process.env.NEXT_PUBLIC_DRIVE_FOLDER_ID)
@@ -12,24 +15,11 @@ export default function BiblioPage() {
   const [fileData, setFileData] = useState(null)
   const [fileMime, setFileMime] = useState(null)
   const [loadingFile, setLoadingFile] = useState(false)
-  const [userName, setUserName] = useState('')
   const [canvases, setCanvases] = useState([])
   const [search, setSearch] = useState('')
   const [searching, setSearching] = useState(false)
 
   useEffect(() => { fetchFolder(currentFolder) }, [currentFolder])
-
-  useEffect(() => {
-    async function getName() {
-      const { supabase } = await import('../../../lib/supabase')
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data } = await supabase.from('users').select('full_name, email').eq('id', user.id).single()
-        if (data) setUserName(data.full_name + ' · ' + data.email)
-      }
-    }
-    getName()
-  }, [])
 
   async function fetchFolder(folderId) {
     setLoading(true)
@@ -73,10 +63,8 @@ export default function BiblioPage() {
     setFileData(null)
     setFileMime(null)
     setCanvases([])
-
     const res = await fetch('/api/drive/file?fileId=' + file.id)
     const data = await res.json()
-
     if (data.mimeType === 'application/pdf') {
       await renderPDF(data.data, data.mimeType)
     } else {
@@ -89,14 +77,11 @@ export default function BiblioPage() {
   async function renderPDF(base64, mime) {
     const pdfjsLib = (await import('pdfjs-dist/legacy/build/pdf.mjs')).default || await import('pdfjs-dist/legacy/build/pdf.mjs')
     pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
-
     const binary = atob(base64)
     const bytes = new Uint8Array(binary.length)
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-
     const pdf = await pdfjsLib.getDocument({ data: bytes }).promise
     const pages = []
-
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i)
       const viewport = page.getViewport({ scale: 1.5 })
@@ -136,85 +121,74 @@ export default function BiblioPage() {
   const isImage = fileMime?.includes('image')
   const isPDF = fileMime === 'application/pdf'
 
-  const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid ' + t.border },
-    title: { fontSize: '18px', fontWeight: '600', color: t.text },
-    content: { padding: '24px 28px' },
-    card: { background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', overflow: 'hidden' },
-    item: { display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 16px', cursor: 'pointer', transition: 'background 0.15s' },
-    modal: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', flexDirection: 'column', zIndex: 50 },
-    modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: t.surface, borderBottom: '1px solid ' + t.border, flexShrink: 0 },
-  }
-
   return (
     <AccesProtege>
-      <div style={{ color: t.text }}>
-        <div style={s.topbar}>
-          <h1 style={s.title}>Bibliotheque</h1>
+      <div style={{ color: c.text, background: c.bg, minHeight: '100vh', fontFamily: "'DM Sans', system-ui", transition: 'background 0.2s' }}>
+
+        {/* Topbar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 32px', borderBottom: '1px solid ' + c.border, background: c.surface, transition: 'background 0.2s' }}>
+          <h1 style={{ fontSize: '20px', fontWeight: '700', color: c.text, letterSpacing: '-0.3px', margin: 0 }}>Bibliotheque</h1>
           <form onSubmit={handleSearch} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher un fichier..."
-              style={{ padding: '7px 12px', background: t.surface2, border: '1px solid ' + t.border2, borderRadius: '8px', color: t.text, fontSize: '13px', outline: 'none', width: '240px' }}
+              style={{ padding: '7px 12px', background: c.surface2, border: '1px solid ' + c.border2, borderRadius: '8px', color: c.text, fontSize: '13px', outline: 'none', width: '240px', fontFamily: 'inherit' }}
             />
-            <button type="submit" style={{ padding: '7px 14px', background: t.purple, border: 'none', borderRadius: '8px', color: '#1a1228', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>
+            <button type="submit" style={{ padding: '7px 14px', background: c.purple, border: 'none', borderRadius: '8px', color: isDark ? '#1a1228' : '#ffffff', fontSize: '13px', fontWeight: '500', cursor: 'pointer', fontFamily: 'inherit' }}>
               Chercher
             </button>
             {searching && (
-              <button type="button" onClick={clearSearch} style={{ padding: '7px 14px', background: 'none', border: '1px solid ' + t.border2, borderRadius: '8px', color: t.muted2, fontSize: '13px', cursor: 'pointer' }}>
+              <button type="button" onClick={clearSearch} style={{ padding: '7px 14px', background: 'none', border: '1px solid ' + c.border, borderRadius: '8px', color: c.muted2, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Effacer
               </button>
             )}
           </form>
         </div>
 
-        <div style={s.content}>
+        <div style={{ padding: '28px 32px' }}>
           {!searching && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px', fontSize: '13px' }}>
               {breadcrumb.map((crumb, i) => (
                 <span key={crumb.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  {i > 0 && <span style={{ color: t.muted }}>›</span>}
-                  <span onClick={() => goToBreadcrumb(i)} style={{ color: i === breadcrumb.length - 1 ? t.text : t.purple, cursor: 'pointer', fontWeight: i === breadcrumb.length - 1 ? '500' : '400' }}>
+                  {i > 0 && <span style={{ color: c.muted }}>›</span>}
+                  <span onClick={() => goToBreadcrumb(i)} style={{ color: i === breadcrumb.length - 1 ? c.text : c.purple, cursor: 'pointer', fontWeight: i === breadcrumb.length - 1 ? '500' : '400' }}>
                     {crumb.name}
                   </span>
                 </span>
               ))}
             </div>
           )}
-
           {searching && (
-            <div style={{ fontSize: '13px', color: t.muted, marginBottom: '16px' }}>
-              Resultats pour "<span style={{ color: t.text }}>{search}</span>"
+            <div style={{ fontSize: '13px', color: c.muted, marginBottom: '16px' }}>
+              Resultats pour "<span style={{ color: c.text }}>{search}</span>"
             </div>
           )}
 
-          <div style={s.card}>
+          <div style={{ background: c.surface, border: '1px solid ' + c.border, borderRadius: '12px', overflow: 'hidden', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.04)' }}>
             {loading ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>Chargement...</div>
+              <div style={{ padding: '40px', textAlign: 'center', color: c.muted }}>Chargement...</div>
             ) : items.length === 0 ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: t.muted }}>
-                {searching ? 'Aucun resultat.' : 'Dossier vide.'}
-              </div>
+              <div style={{ padding: '40px', textAlign: 'center', color: c.muted }}>{searching ? 'Aucun resultat.' : 'Dossier vide.'}</div>
             ) : (
               items.map((item, idx) => (
                 <div
                   key={item.id}
-                  style={{ ...s.item, borderBottom: idx === items.length - 1 ? 'none' : '1px solid ' + t.border }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 16px', cursor: 'pointer', transition: 'background 0.15s', borderBottom: idx === items.length - 1 ? 'none' : '1px solid ' + c.border }}
                   onClick={() => item.mimeType === 'application/vnd.google-apps.folder' ? openFolder(item.id, item.name) : openFile(item)}
-                  onMouseEnter={e => e.currentTarget.style.background = t.surface2}
+                  onMouseEnter={e => e.currentTarget.style.background = c.surface2}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   <span style={{ fontSize: '20px' }}>{getIcon(item.mimeType)}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: '500', color: t.text }}>{item.name}</div>
-                    <div style={{ fontSize: '11px', color: t.muted }}>
+                    <div style={{ fontSize: '13px', fontWeight: '500', color: c.text }}>{item.name}</div>
+                    <div style={{ fontSize: '11px', color: c.muted }}>
                       {new Date(item.modifiedTime).toLocaleDateString('fr-FR')}
                       {item.size && ' · ' + formatSize(item.size)}
                     </div>
                   </div>
                   {item.mimeType !== 'application/vnd.google-apps.folder' && (
-                    <span style={{ fontSize: '11px', color: t.purple }}>Ouvrir →</span>
+                    <span style={{ fontSize: '11px', color: c.purple }}>Ouvrir →</span>
                   )}
                 </div>
               ))
@@ -222,48 +196,28 @@ export default function BiblioPage() {
           </div>
         </div>
 
+        {/* Viewer */}
         {viewerFile && (
-          <div style={s.modal} onContextMenu={e => e.preventDefault()}>
-            <div style={s.modalHeader}>
-              <div style={{ fontSize: '14px', fontWeight: '500', color: t.text }}>{viewerFile.name}</div>
-              <button onClick={closeViewer} style={{ background: 'none', border: '1px solid ' + t.border2, borderRadius: '8px', padding: '6px 12px', color: t.muted2, cursor: 'pointer', fontSize: '13px' }}>
+          <div style={{ position: 'fixed', inset: 0, background: isDark ? 'rgba(0,0,0,0.92)' : 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', zIndex: 50 }} onContextMenu={e => e.preventDefault()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: c.surface, borderBottom: '1px solid ' + c.border, flexShrink: 0 }}>
+              <div style={{ fontSize: '14px', fontWeight: '500', color: c.text }}>{viewerFile.name}</div>
+              <button onClick={closeViewer} style={{ background: 'none', border: '1px solid ' + c.border, borderRadius: '8px', padding: '6px 12px', color: c.muted2, cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>
                 Fermer
               </button>
             </div>
-
             <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', gap: '12px', userSelect: 'none' }}>
-              {loadingFile && (
-                <div style={{ color: t.muted, padding: '60px' }}>Chargement du fichier...</div>
-              )}
-
+              {loadingFile && <div style={{ color: '#6e6c66', padding: '60px' }}>Chargement du fichier...</div>}
               {!loadingFile && isPDF && canvases.length > 0 && canvases.map((src, i) => (
                 <div key={i} style={{ position: 'relative', maxWidth: '900px', width: '100%' }}>
-                  <img
-                    src={src}
-                    alt={'Page ' + (i + 1)}
-                    style={{ width: '100%', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.5)', display: 'block', pointerEvents: 'none' }}
-                    draggable={false}
-                  />
+                  <img src={src} alt={'Page ' + (i + 1)} style={{ width: '100%', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.5)', display: 'block', pointerEvents: 'none' }} draggable={false} />
                 </div>
               ))}
-
-              {!loadingFile && isPDF && canvases.length === 0 && (
-                <div style={{ color: t.muted, padding: '40px' }}>Rendu en cours...</div>
-              )}
-
+              {!loadingFile && isPDF && canvases.length === 0 && <div style={{ color: '#6e6c66', padding: '40px' }}>Rendu en cours...</div>}
               {!loadingFile && isImage && fileData && (
-                <img
-                  src={'data:' + fileMime + ';base64,' + fileData}
-                  alt={viewerFile.name}
-                  style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '8px', objectFit: 'contain', pointerEvents: 'none' }}
-                  draggable={false}
-                />
+                <img src={'data:' + fileMime + ';base64,' + fileData} alt={viewerFile.name} style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: '8px', objectFit: 'contain', pointerEvents: 'none' }} draggable={false} />
               )}
-
               {!loadingFile && !isPDF && !isImage && fileData && (
-                <div style={{ color: t.muted, padding: '60px', textAlign: 'center' }}>
-                  Ce type de fichier ne peut pas etre previsualise.
-                </div>
+                <div style={{ color: '#6e6c66', padding: '60px', textAlign: 'center' }}>Ce type de fichier ne peut pas etre previsualise.</div>
               )}
             </div>
           </div>

@@ -1,13 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { t } from '../../lib/theme'
+import { useTheme, getTheme } from '../context/ThemeContext'
 import AccesProtege from './AccesProtege'
 
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 const MOIS_LABELS = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
 
-function Calendrier({ seances, onSeanceClick }) {
+function Calendrier({ seances, onSeanceClick, c, isDark }) {
   const [today] = useState(new Date())
   const [currentDate, setCurrentDate] = useState(new Date())
   const year = currentDate.getFullYear()
@@ -37,34 +37,34 @@ function Calendrier({ seances, onSeanceClick }) {
     return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()
   }
 
-  const COLORS = { cours: t.purple, kholle: t.teal, entretien: t.coral }
+  const COLORS = { cours: c.purple, kholle: c.teal, entretien: c.coral }
 
   return (
-    <div style={{ background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid ' + t.border }}>
-        <button onClick={prevMonth} style={{ background: 'none', border: '1px solid ' + t.border2, borderRadius: '8px', padding: '6px 14px', color: t.muted2, cursor: 'pointer', fontSize: '16px' }}>←</button>
-        <span style={{ fontSize: '16px', fontWeight: '600', color: t.text }}>{MOIS_LABELS[month]} {year}</span>
-        <button onClick={nextMonth} style={{ background: 'none', border: '1px solid ' + t.border2, borderRadius: '8px', padding: '6px 14px', color: t.muted2, cursor: 'pointer', fontSize: '16px' }}>→</button>
+    <div style={{ background: c.surface, border: '1px solid ' + c.border, borderRadius: '12px', overflow: 'hidden', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid ' + c.border }}>
+        <button onClick={prevMonth} style={{ background: 'none', border: '1px solid ' + c.border2, borderRadius: '8px', padding: '6px 14px', color: c.muted2, cursor: 'pointer', fontSize: '16px' }}>←</button>
+        <span style={{ fontSize: '16px', fontWeight: '600', color: c.text }}>{MOIS_LABELS[month]} {year}</span>
+        <button onClick={nextMonth} style={{ background: 'none', border: '1px solid ' + c.border2, borderRadius: '8px', padding: '6px 14px', color: c.muted2, cursor: 'pointer', fontSize: '16px' }}>→</button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid ' + t.border }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid ' + c.border }}>
         {JOURS.map(j => (
-          <div key={j} style={{ padding: '8px', textAlign: 'center', fontSize: '11px', fontWeight: '500', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{j}</div>
+          <div key={j} style={{ padding: '8px', textAlign: 'center', fontSize: '11px', fontWeight: '500', color: c.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{j}</div>
         ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
         {days.map((day, idx) => {
           const daySeances = seancesForDay(day.date)
           return (
-            <div key={idx} style={{ minHeight: '100px', padding: '6px', borderRight: (idx + 1) % 7 === 0 ? 'none' : '1px solid ' + t.border, borderBottom: idx >= 35 ? 'none' : '1px solid ' + t.border, background: !day.currentMonth ? 'rgba(0,0,0,0.1)' : 'transparent' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: isToday(day.date) ? '700' : '400', color: isToday(day.date) ? '#1a1228' : day.currentMonth ? t.text : t.muted, background: isToday(day.date) ? t.blue : 'none', marginBottom: '4px' }}>
+            <div key={idx} style={{ minHeight: '100px', padding: '6px', borderRight: (idx + 1) % 7 === 0 ? 'none' : '1px solid ' + c.border, borderBottom: idx >= 35 ? 'none' : '1px solid ' + c.border, background: !day.currentMonth ? (isDark ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.02)') : 'transparent' }}>
+              <div style={{ width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: isToday(day.date) ? '700' : '400', color: isToday(day.date) ? (isDark ? '#1a1228' : '#ffffff') : day.currentMonth ? c.text : c.muted, background: isToday(day.date) ? c.blue : 'none', marginBottom: '4px' }}>
                 {day.date.getDate()}
               </div>
               {daySeances.slice(0, 3).map(item => (
-                <div key={item.seance_id} onClick={() => onSeanceClick(item)} style={{ background: (COLORS[item.seance?.type] || t.blue) + '22', borderLeft: '3px solid ' + (COLORS[item.seance?.type] || t.blue), borderRadius: '4px', padding: '2px 5px', marginBottom: '2px', fontSize: '10px', color: COLORS[item.seance?.type] || t.blue, cursor: 'pointer', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.4 }}>
+                <div key={item.seance_id} onClick={() => onSeanceClick(item)} style={{ background: (COLORS[item.seance?.type] || c.blue) + (isDark ? '22' : '15'), borderLeft: '3px solid ' + (COLORS[item.seance?.type] || c.blue), borderRadius: '4px', padding: '2px 5px', marginBottom: '2px', fontSize: '10px', color: COLORS[item.seance?.type] || c.blue, cursor: 'pointer', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.4 }}>
                   {new Date(item.seance?.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} {item.seance?.titre}
                 </div>
               ))}
-              {daySeances.length > 3 && <div style={{ fontSize: '10px', color: t.muted }}>+{daySeances.length - 3} autres</div>}
+              {daySeances.length > 3 && <div style={{ fontSize: '10px', color: c.muted }}>+{daySeances.length - 3} autres</div>}
             </div>
           )
         })}
@@ -74,6 +74,9 @@ function Calendrier({ seances, onSeanceClick }) {
 }
 
 export default function ElevePlanning() {
+  const { theme, isDark } = useTheme()
+  const c = getTheme(theme)
+
   const [seances, setSeances] = useState([])
   const [loading, setLoading] = useState(true)
   const [vue, setVue] = useState('liste')
@@ -84,62 +87,49 @@ export default function ElevePlanning() {
   async function fetchSeances() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data } = await supabase
-      .from('seance_eleves')
-      .select('*, seance:seance_id(*, prof:prof_id(full_name))')
-      .eq('eleve_id', user.id)
-      .order('seance_id', { ascending: true })
+    const { data } = await supabase.from('seance_eleves').select('*, seance:seance_id(*, prof:prof_id(full_name))').eq('eleve_id', user.id).order('seance_id', { ascending: true })
     setSeances(data || [])
     setLoading(false)
   }
 
   const TYPES = {
-    cours: { label: 'Cours', color: t.purple },
-    kholle: { label: 'Kholle', color: t.teal },
-    entretien: { label: 'Entretien', color: t.coral }
+    cours: { label: 'Cours', color: c.purple },
+    kholle: { label: 'Kholle', color: c.teal },
+    entretien: { label: 'Entretien', color: c.coral }
   }
 
   const upcoming = seances.filter(s => new Date(s.seance?.date_debut) >= new Date())
   const past = seances.filter(s => new Date(s.seance?.date_debut) < new Date())
 
   const s = {
-    topbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderBottom: '1px solid ' + t.border },
-    title: { fontSize: '18px', fontWeight: '600', color: t.text },
-    content: { padding: '24px 28px' },
-    card: { background: t.surface, border: '1px solid ' + t.border, borderRadius: '12px', marginBottom: '10px' },
+    btn: { padding: '6px 12px', borderRadius: '8px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer' },
+    btnGhost: { background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: c.muted2, border: '1px solid ' + c.border },
+    btnPrimary: { background: c.purple, color: isDark ? '#1a1228' : '#ffffff' },
+    card: { background: c.surface, border: '1px solid ' + c.border, borderRadius: '12px', marginBottom: '10px', boxShadow: isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)' },
     seanceCard: { padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' },
     stripe: { width: '3px', borderRadius: '2px', alignSelf: 'stretch', minHeight: '40px', flexShrink: 0 },
-    sectionLabel: { fontSize: '11px', color: t.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' },
-    btn: { padding: '6px 12px', borderRadius: '8px', border: 'none', fontSize: '12px', fontWeight: '500', cursor: 'pointer' },
-    btnGhost: { background: 'rgba(255,255,255,0.06)', color: t.muted2, border: '1px solid ' + t.border },
-    btnPrimary: { background: t.purple, color: '#1a1228' },
+    sectionLabel: { fontSize: '11px', color: c.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' },
   }
 
   return (
     <AccesProtege>
-      <div style={{ color: t.text }}>
-        <div style={s.topbar}>
-          <h1 style={s.title}>Mon planning</h1>
+      <div style={{ color: c.text, background: c.bg, minHeight: '100vh', fontFamily: "'DM Sans', system-ui", transition: 'background 0.2s' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 32px', borderBottom: '1px solid ' + c.border, background: c.surface, transition: 'background 0.2s' }}>
+          <h1 style={{ fontSize: '20px', fontWeight: '700', color: c.text, letterSpacing: '-0.3px', margin: 0 }}>Mon planning</h1>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <button onClick={() => setVue('liste')} style={{ ...s.btn, ...(vue === 'liste' ? s.btnPrimary : s.btnGhost) }}>
-              Liste
-            </button>
-            <button onClick={() => setVue('calendrier')} style={{ ...s.btn, ...(vue === 'calendrier' ? s.btnPrimary : s.btnGhost) }}>
-              Calendrier
-            </button>
-            <span style={{ fontSize: '12px', color: t.muted, marginLeft: '8px' }}>
-              {upcoming.length} seance{upcoming.length > 1 ? 's' : ''} a venir
-            </span>
+            <button onClick={() => setVue('liste')} style={{ ...s.btn, ...(vue === 'liste' ? s.btnPrimary : s.btnGhost) }}>Liste</button>
+            <button onClick={() => setVue('calendrier')} style={{ ...s.btn, ...(vue === 'calendrier' ? s.btnPrimary : s.btnGhost) }}>Calendrier</button>
+            <span style={{ fontSize: '12px', color: c.muted, marginLeft: '8px' }}>{upcoming.length} seance{upcoming.length > 1 ? 's' : ''} a venir</span>
           </div>
         </div>
 
-        <div style={s.content}>
+        <div style={{ padding: '28px 32px' }}>
           {loading ? (
-            <div style={{ color: t.muted, textAlign: 'center', padding: '40px' }}>Chargement...</div>
+            <div style={{ color: c.muted, textAlign: 'center', padding: '40px' }}>Chargement...</div>
           ) : seances.length === 0 ? (
-            <div style={{ color: t.muted, textAlign: 'center', padding: '40px' }}>Aucune seance planifiee.</div>
+            <div style={{ color: c.muted, textAlign: 'center', padding: '40px' }}>Aucune seance planifiee.</div>
           ) : vue === 'calendrier' ? (
-            <Calendrier seances={seances} onSeanceClick={setSeanceDetail} />
+            <Calendrier seances={seances} onSeanceClick={setSeanceDetail} c={c} isDark={isDark} />
           ) : (
             <>
               {upcoming.length > 0 && (
@@ -150,8 +140,8 @@ export default function ElevePlanning() {
                       <div style={s.seanceCard}>
                         <div style={{ ...s.stripe, background: TYPES[item.seance?.type]?.color }} />
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>{item.seance?.titre}</div>
-                          <div style={{ fontSize: '12px', color: t.muted }}>
+                          <div style={{ fontSize: '14px', fontWeight: '500', color: c.text, marginBottom: '4px' }}>{item.seance?.titre}</div>
+                          <div style={{ fontSize: '12px', color: c.muted }}>
                             {new Date(item.seance?.date_debut).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
                             {' · '}
                             {new Date(item.seance?.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -159,11 +149,9 @@ export default function ElevePlanning() {
                             {new Date(item.seance?.date_fin).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                             {item.seance?.salle && ' · ' + item.seance.salle}
                           </div>
-                          {item.seance?.prof?.full_name && (
-                            <div style={{ fontSize: '11px', color: t.muted, marginTop: '3px' }}>Prof. {item.seance.prof.full_name}</div>
-                          )}
+                          {item.seance?.prof?.full_name && <div style={{ fontSize: '11px', color: c.muted, marginTop: '3px' }}>Prof. {item.seance.prof.full_name}</div>}
                         </div>
-                        <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[item.seance?.type]?.color + '22', color: TYPES[item.seance?.type]?.color }}>
+                        <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[item.seance?.type]?.color + (isDark ? '22' : '15'), color: TYPES[item.seance?.type]?.color }}>
                           {TYPES[item.seance?.type]?.label}
                         </span>
                       </div>
@@ -179,30 +167,28 @@ export default function ElevePlanning() {
                       <div style={s.seanceCard}>
                         <div style={{ ...s.stripe, background: TYPES[item.seance?.type]?.color }} />
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>{item.seance?.titre}</div>
-                          <div style={{ fontSize: '12px', color: t.muted }}>
+                          <div style={{ fontSize: '14px', fontWeight: '500', color: c.text, marginBottom: '4px' }}>{item.seance?.titre}</div>
+                          <div style={{ fontSize: '12px', color: c.muted }}>
                             {new Date(item.seance?.date_debut).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
                             {' · '}
                             {new Date(item.seance?.date_debut).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                             {item.seance?.salle && ' · ' + item.seance.salle}
                           </div>
-                          {item.seance?.prof?.full_name && (
-                            <div style={{ fontSize: '11px', color: t.muted, marginTop: '3px' }}>Prof. {item.seance.prof.full_name}</div>
-                          )}
+                          {item.seance?.prof?.full_name && <div style={{ fontSize: '11px', color: c.muted, marginTop: '3px' }}>Prof. {item.seance.prof.full_name}</div>}
                         </div>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[item.seance?.type]?.color + '22', color: TYPES[item.seance?.type]?.color }}>
+                          <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[item.seance?.type]?.color + (isDark ? '22' : '15'), color: TYPES[item.seance?.type]?.color }}>
                             {TYPES[item.seance?.type]?.label}
                           </span>
                           {item.note && (
-                            <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: 'rgba(52,211,153,0.12)', color: t.teal }}>
+                            <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: isDark ? 'rgba(52,211,153,0.12)' : 'rgba(5,150,105,0.08)', color: c.teal }}>
                               {item.note}/20
                             </span>
                           )}
                         </div>
                       </div>
                       {item.feedback && (
-                        <div style={{ padding: '10px 20px 14px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '12px', color: t.muted2, fontStyle: 'italic' }}>
+                        <div style={{ padding: '10px 20px 14px', borderTop: '1px solid ' + c.border, fontSize: '12px', color: c.muted2, fontStyle: 'italic' }}>
                           {item.feedback}
                         </div>
                       )}
@@ -216,14 +202,14 @@ export default function ElevePlanning() {
 
         {/* Modale detail seance */}
         {seanceDetail && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} onClick={() => setSeanceDetail(null)}>
-            <div style={{ background: t.surface, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px' }} onClick={e => e.stopPropagation()}>
+          <div style={{ position: 'fixed', inset: 0, background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} onClick={() => setSeanceDetail(null)}>
+            <div style={{ background: c.surface, border: '1px solid ' + c.border, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
-                  <div style={{ fontSize: '16px', fontWeight: '600', color: t.text }}>{seanceDetail.seance?.titre}</div>
-                  {seanceDetail.seance?.matiere && <div style={{ fontSize: '12px', color: t.muted, marginTop: '2px' }}>{seanceDetail.seance.matiere}</div>}
+                  <div style={{ fontSize: '16px', fontWeight: '600', color: c.text }}>{seanceDetail.seance?.titre}</div>
+                  {seanceDetail.seance?.matiere && <div style={{ fontSize: '12px', color: c.muted, marginTop: '2px' }}>{seanceDetail.seance.matiere}</div>}
                 </div>
-                <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[seanceDetail.seance?.type]?.color + '22', color: TYPES[seanceDetail.seance?.type]?.color }}>
+                <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '500', background: TYPES[seanceDetail.seance?.type]?.color + (isDark ? '22' : '15'), color: TYPES[seanceDetail.seance?.type]?.color }}>
                   {TYPES[seanceDetail.seance?.type]?.label}
                 </span>
               </div>
@@ -234,13 +220,13 @@ export default function ElevePlanning() {
                 { label: 'Salle', value: seanceDetail.seance?.salle || '-' },
                 seanceDetail.note ? { label: 'Note', value: seanceDetail.note + '/20' } : null,
               ].filter(Boolean).map(item => (
-                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' }}>
-                  <span style={{ color: t.muted }}>{item.label}</span>
-                  <span style={{ color: item.label === 'Note' ? t.teal : t.text, fontWeight: '500', textAlign: 'right', textTransform: 'capitalize' }}>{item.value}</span>
+                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid ' + c.border, fontSize: '13px' }}>
+                  <span style={{ color: c.muted }}>{item.label}</span>
+                  <span style={{ color: item.label === 'Note' ? c.teal : c.text, fontWeight: '500', textAlign: 'right', textTransform: 'capitalize' }}>{item.value}</span>
                 </div>
               ))}
               {seanceDetail.feedback && (
-                <div style={{ marginTop: '12px', padding: '10px 12px', background: t.surface2, borderRadius: '8px', fontSize: '12px', color: t.muted2, fontStyle: 'italic' }}>
+                <div style={{ marginTop: '12px', padding: '10px 12px', background: c.surface2, borderRadius: '8px', fontSize: '12px', color: c.muted2, fontStyle: 'italic' }}>
                   💬 {seanceDetail.feedback}
                 </div>
               )}
