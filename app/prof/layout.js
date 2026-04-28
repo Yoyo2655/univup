@@ -53,7 +53,6 @@ export default function ProfLayout({ children }) {
           <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: c.text, fontSize: '20px', lineHeight: 1 }}>
             ☰
           </button>
-          <img src="/Logo1w_univup-removebg.png" alt="UnivUp" style={{ height: '28px', objectFit: 'contain', display: 'block' }} />
         </div>
       )}
 
