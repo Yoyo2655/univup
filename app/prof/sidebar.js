@@ -14,6 +14,19 @@ export default function ProfSidebar({ onClose }) {
   const [unreadChat, setUnreadChat] = useState(0)
   const [userId, setUserId] = useState(null)
   const [open, setOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Détecter mobile au montage
+  useEffect(() => {
+    function check() {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (!mobile) setOpen(true) // desktop → toujours ouvert
+    }
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     async function init() {
@@ -34,7 +47,10 @@ export default function ProfSidebar({ onClose }) {
     }
   }, [pathname])
 
-  useEffect(() => { setOpen(false) }, [pathname])
+  // Fermer uniquement sur mobile quand on change de page
+  useEffect(() => {
+    if (isMobile) setOpen(false)
+  }, [pathname])
 
   async function countUnreadChat(uid) {
     const lastVisit = localStorage.getItem('univup-chat-last-visit') || '1970-01-01'
@@ -74,8 +90,8 @@ export default function ProfSidebar({ onClose }) {
 
   return (
     <>
-      {/* Bouton hamburger fixe — visible quand sidebar fermée */}
-      {!open && (
+      {/* Bouton hamburger — visible sur mobile quand sidebar fermée */}
+      {!open && isMobile && (
         <button onClick={() => setOpen(true)} style={{ position: 'fixed', top: '12px', left: '12px', zIndex: 200, background: c.surface, border: '1px solid ' + c.border, borderRadius: '8px', padding: '8px 10px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
           <div style={{ width: '18px', height: '2px', background: c.text, borderRadius: '2px' }} />
           <div style={{ width: '18px', height: '2px', background: c.text, borderRadius: '2px' }} />
@@ -86,13 +102,16 @@ export default function ProfSidebar({ onClose }) {
       {/* Sidebar */}
       <div style={{ width: open ? '220px' : '0px', flexShrink: 0, background: isDark ? '#111010' : '#ffffff', borderRight: open ? '1px solid ' + c.border : 'none', display: 'flex', flexDirection: 'column', padding: open ? '20px 0' : '0', position: 'fixed', height: '100vh', fontFamily: "'DM Sans', system-ui, sans-serif", transition: 'width 0.25s ease, padding 0.25s ease', overflow: 'hidden', zIndex: 150 }}>
 
-        {/* Header avec ✕ */}
+        {/* Header */}
         <div style={{ padding: '0 20px 20px', borderBottom: '1px solid ' + c.border, marginBottom: '8px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div>
             <Image src={isDark ? '/Logo1w_univup-removebg.png' : '/Logo1b_univup-removebg.png'} alt="UnivUp" width={120} height={40} style={{ objectFit: 'contain' }} />
             <div style={{ fontSize: '11px', color: c.muted, marginTop: '2px', marginLeft: '2px', letterSpacing: '0.3px' }}>Espace professeur</div>
           </div>
-          <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.muted, fontSize: '18px', padding: '2px', lineHeight: 1, marginTop: '4px', flexShrink: 0 }}>✕</button>
+          {/* ✕ uniquement sur mobile */}
+          {isMobile && (
+            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.muted, fontSize: '18px', padding: '2px', lineHeight: 1, marginTop: '4px', flexShrink: 0 }}>✕</button>
+          )}
         </div>
 
         {/* Séparateur tricolore */}
@@ -107,7 +126,7 @@ export default function ProfSidebar({ onClose }) {
           {navItems.map(item => {
             const isActive = pathname === item.href
             return (
-              <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }} onClick={() => setOpen(false)}>
+              <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }} onClick={() => { if (isMobile) setOpen(false) }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '8px', marginBottom: '2px', background: isActive ? (isDark ? 'rgba(155,142,196,0.1)' : 'rgba(124,58,237,0.08)') : 'none', color: isActive ? c.purple : c.muted2, fontSize: '13px', cursor: 'pointer', borderLeft: isActive ? '2px solid ' + c.purple : '2px solid transparent', transition: 'all 0.15s' }}>
                   <span style={{ fontSize: '14px' }}>{item.icon}</span>
                   <span style={{ fontWeight: isActive ? '500' : '400' }}>{item.label}</span>
