@@ -51,10 +51,10 @@ export default function LoginPage() {
           </p>
         </div>
         <div>
-          <Link href="/cgv" style={{ fontSize: '11px', color: '#4a4847', textDecoration: 'none', letterSpacing: '0.3px', display: 'block', marginBottom: '6px' }}>
+          <Link href="/cgv" style={{ fontSize: '11px', color: '#9b8ec4', textDecoration: 'none', letterSpacing: '0.3px', display: 'block', marginBottom: '6px' }}>
             Conditions Generales de Vente →
           </Link>
-          <div style={{ fontSize: '11px', color: '#2e2d2b', letterSpacing: '0.3px' }}>© {new Date().getFullYear()} UnivUp</div>
+          <div style={{ fontSize: '11px', color: '#9b8ec4', letterSpacing: '0.3px' }}>© {new Date().getFullYear()} UnivUp</div>
         </div>
       </div>
 

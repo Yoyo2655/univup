@@ -46,9 +46,7 @@ function Calendrier({ seances, onSeanceClick, c, isDark }) {
         <button onClick={nextMonth} style={{ background: 'none', border: '1px solid ' + c.border2, borderRadius: '8px', padding: '6px 14px', color: c.muted2, cursor: 'pointer', fontSize: '16px' }}>→</button>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid ' + c.border }}>
-        {JOURS.map(j => (
-          <div key={j} style={{ padding: '8px', textAlign: 'center', fontSize: '11px', fontWeight: '500', color: c.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{j}</div>
-        ))}
+        {JOURS.map(j => <div key={j} style={{ padding: '8px', textAlign: 'center', fontSize: '11px', fontWeight: '500', color: c.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{j}</div>)}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
         {days.map((day, idx) => {
@@ -82,9 +80,11 @@ export default function PlanningPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [vue, setVue] = useState('liste')
   const [seanceDetail, setSeanceDetail] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [form, setForm] = useState({ type: 'cours', titre: '', matiere: '', date: '', heure_debut: '', heure_fin: '', salle: '', prof_ids: [], eleve_ids: [] })
 
   useEffect(() => { fetchAll() }, [])
@@ -131,17 +131,30 @@ export default function PlanningPage() {
     setSaving(false)
   }
 
+  async function deleteSeance() {
+    if (!seanceDetail) return
+    setDeleting(true)
+    // Supprimer d'abord les lignes seance_eleves liées
+    await supabase.from('seance_eleves').delete().eq('seance_id', seanceDetail.id)
+    await supabase.from('seances').delete().eq('id', seanceDetail.id)
+    setDeleting(false)
+    setShowDeleteConfirm(false)
+    setSeanceDetail(null)
+    fetchAll()
+  }
+
   const TYPES = { cours: { label: 'Cours', color: c.purple }, kholle: { label: 'Kholle', color: c.teal } }
   const MATIERES = ['Maths', 'Physique', 'Motivation', 'Anglais', 'Info', 'Autre']
 
   const s = {
-    btn: { padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
+    btn: { padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer', fontFamily: 'inherit' },
     btnPrimary: { background: c.purple, color: isDark ? '#1a1228' : '#ffffff' },
     btnGhost: { background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: c.muted2, border: '1px solid ' + c.border },
+    btnDanger: { background: isDark ? 'rgba(248,113,113,0.1)' : 'rgba(220,38,38,0.06)', color: c.coral, border: '1px solid ' + (isDark ? 'rgba(248,113,113,0.2)' : 'rgba(220,38,38,0.15)') },
     card: { background: c.surface, border: '1px solid ' + c.border, borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.04)' },
     th: { textAlign: 'left', fontSize: '10px', fontWeight: '500', color: c.muted, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '10px 16px', borderBottom: '1px solid ' + c.border },
     td: { padding: '12px 16px', borderBottom: '1px solid ' + c.border, fontSize: '13px', color: c.muted2, verticalAlign: 'top' },
-    input: { width: '100%', padding: '9px 12px', background: c.surface2, border: '1px solid ' + c.border2, borderRadius: '8px', color: c.text, fontSize: '13px', outline: 'none', boxSizing: 'border-box' },
+    input: { width: '100%', padding: '9px 12px', background: c.surface2, border: '1px solid ' + c.border2, borderRadius: '8px', color: c.text, fontSize: '13px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' },
     label: { display: 'block', fontSize: '12px', color: c.muted2, marginBottom: '6px', marginTop: '14px' },
     checkList: { background: c.surface2, border: '1px solid ' + c.border2, borderRadius: '8px', padding: '8px', maxHeight: '160px', overflowY: 'auto' },
     checkItem: { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', color: c.muted2 },
@@ -171,9 +184,7 @@ export default function PlanningPage() {
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr>
-                    {['Type', 'Titre', 'Date', 'Prof', 'Salle', 'Statut'].map(h => <th key={h} style={s.th}>{h}</th>)}
-                  </tr>
+                  <tr>{['Type', 'Titre', 'Date', 'Prof', 'Salle', 'Statut'].map(h => <th key={h} style={s.th}>{h}</th>)}</tr>
                 </thead>
                 <tbody>
                   {seances.map(s2 => (
@@ -212,7 +223,7 @@ export default function PlanningPage() {
       </div>
 
       {/* Modale detail seance */}
-      {seanceDetail && (
+      {seanceDetail && !showDeleteConfirm && (
         <div style={{ position: 'fixed', inset: 0, background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} onClick={() => setSeanceDetail(null)}>
           <div style={{ background: c.surface, border: '1px solid ' + c.border, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
@@ -236,7 +247,31 @@ export default function PlanningPage() {
                 <span style={{ color: c.text, fontWeight: '500', textAlign: 'right', textTransform: 'capitalize' }}>{item.value}</span>
               </div>
             ))}
-            <button onClick={() => setSeanceDetail(null)} style={{ ...s.btn, ...s.btnGhost, width: '100%', marginTop: '16px' }}>Fermer</button>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+              <button onClick={() => setSeanceDetail(null)} style={{ ...s.btn, ...s.btnGhost, flex: 1 }}>Fermer</button>
+              <button onClick={() => setShowDeleteConfirm(true)} style={{ ...s.btn, ...s.btnDanger, flex: 1 }}>Supprimer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modale confirmation suppression */}
+      {showDeleteConfirm && seanceDetail && (
+        <div style={{ position: 'fixed', inset: 0, background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 70 }} onClick={() => setShowDeleteConfirm(false)}>
+          <div style={{ background: c.surface, border: '1px solid ' + c.border, borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '400px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ color: c.coral, fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Supprimer cette seance ?</h2>
+            <p style={{ fontSize: '13px', color: c.muted, marginBottom: '8px', lineHeight: 1.6 }}>
+              Tu es sur le point de supprimer <strong style={{ color: c.text }}>{seanceDetail.titre}</strong>.
+            </p>
+            <p style={{ fontSize: '13px', color: c.muted, marginBottom: '24px', lineHeight: 1.6 }}>
+              Toutes les presences et notes associees seront egalement supprimees. Cette action est irreversible.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => { setShowDeleteConfirm(false) }} style={{ ...s.btn, ...s.btnGhost, flex: 1 }}>Annuler</button>
+              <button onClick={deleteSeance} disabled={deleting} style={{ ...s.btn, background: c.coral, color: '#fff', border: 'none', flex: 1, cursor: deleting ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                {deleting ? 'Suppression...' : 'Confirmer'}
+              </button>
+            </div>
           </div>
         </div>
       )}
