@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase'
 import { useEffect, useState } from 'react'
 import { useTheme, getTheme } from '../context/ThemeContext'
 
-export default function EleveSidebar() {
+export default function EleveSidebar({ onClose }) {
   const pathname = usePathname()
   const [eleveName, setEleveName] = useState('')
   const { theme, toggleTheme, isDark } = useTheme()
@@ -126,7 +126,7 @@ export default function EleveSidebar() {
         {navItems.map(item => {
           const isActive = pathname === item.href
           return (
-            <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+            <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }} onClick={onClose}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '8px', marginBottom: '2px', background: isActive ? (isDark ? 'rgba(155,142,196,0.1)' : 'rgba(124,58,237,0.08)') : 'none', color: isActive ? c.purple : c.muted2, fontSize: '13px', cursor: 'pointer', borderLeft: isActive ? '2px solid ' + c.purple : '2px solid transparent', transition: 'all 0.15s' }}>
                 <span style={{ fontSize: '14px' }}>{item.icon}</span>
                 <span style={{ fontWeight: isActive ? '500' : '400' }}>{item.label}</span>
