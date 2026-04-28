@@ -14,7 +14,6 @@ export default function ResetPasswordPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Supabase récupère la session depuis le lien magique dans l'URL
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
     })
@@ -37,8 +36,17 @@ export default function ResetPasswordPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: '#0e0d0d', fontFamily: "'DM Sans', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
+      <style>{`
+        .rp-left { display: flex; }
+        .rp-right { padding: 40px; }
+        @media (max-width: 767px) {
+          .rp-left { display: none !important; }
+          .rp-right { padding: 60px 24px 40px !important; align-items: flex-start !important; }
+        }
+      `}</style>
+
       {/* Panneau gauche */}
-      <div style={{ width: '420px', flexShrink: 0, background: '#111010', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="rp-left" style={{ width: '420px', flexShrink: 0, background: '#111010', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'row' }}>
           <div style={{ width: '5px', background: '#111010' }} />
           <div style={{ width: '5px', background: '#9b8ec4' }} />
@@ -64,7 +72,7 @@ export default function ResetPasswordPage() {
       </div>
 
       {/* Panneau droit */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', position: 'relative' }}>
+      <div className="rp-right" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <svg style={{ position: 'absolute', top: 0, right: 0, opacity: 0.06, pointerEvents: 'none' }} width="400" height="400" viewBox="0 0 400 400">
           <polyline points="400,0 180,0 80,200 400,200" fill="none" stroke="#f0eeea" strokeWidth="12" />
           <polyline points="400,14 186,14 86,214 400,214" fill="none" stroke="#9b8ec4" strokeWidth="12" />
@@ -88,15 +96,13 @@ export default function ResetPasswordPage() {
               <form onSubmit={handleReset}>
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Nouveau mot de passe</label>
-                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min. 6 caracteres"
-                    style={inputStyle}
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min. 6 caracteres" style={inputStyle}
                     onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                     onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
                 </div>
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Confirmer</label>
-                  <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required placeholder="Retape ton mot de passe"
-                    style={inputStyle}
+                  <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required placeholder="Retape ton mot de passe" style={inputStyle}
                     onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                     onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
                 </div>

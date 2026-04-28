@@ -27,8 +27,17 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: '#0e0d0d', fontFamily: "'DM Sans', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
-      {/* Panneau gauche */}
-      <div style={{ width: '420px', flexShrink: 0, background: '#111010', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+      <style>{`
+        .login-left { display: flex; }
+        .login-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; }
+        @media (max-width: 767px) {
+          .login-left { display: none !important; }
+          .login-right { padding: 40px 24px; align-items: flex-start; padding-top: 60px; }
+        }
+      `}</style>
+
+      {/* Panneau gauche — caché sur mobile */}
+      <div className="login-left" style={{ width: '420px', flexShrink: 0, background: '#111010', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'row' }}>
           <div style={{ width: '5px', background: '#111010' }} />
           <div style={{ width: '5px', background: '#9b8ec4' }} />
@@ -59,13 +68,20 @@ export default function LoginPage() {
       </div>
 
       {/* Panneau droit */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', position: 'relative' }}>
+      <div className="login-right">
         <svg style={{ position: 'absolute', top: 0, right: 0, opacity: 0.06, pointerEvents: 'none' }} width="400" height="400" viewBox="0 0 400 400">
           <polyline points="400,0 180,0 80,200 400,200" fill="none" stroke="#f0eeea" strokeWidth="12" />
           <polyline points="400,14 186,14 86,214 400,214" fill="none" stroke="#9b8ec4" strokeWidth="12" />
           <polyline points="400,28 192,28 92,228 400,228" fill="none" stroke="#8a1c30" strokeWidth="12" />
         </svg>
+
         <div style={{ width: '100%', maxWidth: '360px', position: 'relative', zIndex: 1 }}>
+
+          {/* Logo visible uniquement sur mobile */}
+          <div style={{ marginBottom: '32px' }}>
+            <style>{`.login-logo-mobile { display: none; } @media (max-width: 767px) { .login-logo-mobile { display: block; } }`}</style>
+          </div>
+
           <h2 style={{ fontSize: '26px', fontWeight: '700', color: '#f0eeea', letterSpacing: '-0.5px', marginBottom: '6px' }}>Connexion</h2>
           <p style={{ fontSize: '13px', color: '#4a4847', marginBottom: '36px' }}>Accede a ton espace personnel</p>
 
@@ -85,7 +101,6 @@ export default function LoginPage() {
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
             </div>
 
-            {/* Lien mot de passe oublié */}
             <div style={{ textAlign: 'right', marginBottom: '20px' }}>
               <Link href="/forgot-password" style={{ fontSize: '12px', color: '#9b8ec4', textDecoration: 'none' }}>
                 Mot de passe oublie ?
@@ -111,6 +126,14 @@ export default function LoginPage() {
             <div style={{ height: '2px', flex: 3, background: 'rgba(240,238,234,0.08)' }} />
             <div style={{ height: '2px', flex: 1, background: 'rgba(155,142,196,0.3)' }} />
             <div style={{ height: '2px', flex: 1, background: 'rgba(138,28,48,0.3)' }} />
+          </div>
+
+          {/* CGV mobile */}
+          <div style={{ marginTop: '24px', textAlign: 'center' }}>
+            <style>{`.cgv-mobile { display: none; } @media (max-width: 767px) { .cgv-mobile { display: block; } }`}</style>
+            <Link href="/cgv" className="cgv-mobile" style={{ fontSize: '11px', color: '#9b8ec4', textDecoration: 'none' }}>
+              Conditions Generales de Vente →
+            </Link>
           </div>
         </div>
       </div>

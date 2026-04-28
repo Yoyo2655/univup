@@ -25,8 +25,17 @@ export default function ForgotPasswordPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: '#0e0d0d', fontFamily: "'DM Sans', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
+      <style>{`
+        .fp-left { display: flex; }
+        .fp-right { padding: 40px; }
+        @media (max-width: 767px) {
+          .fp-left { display: none !important; }
+          .fp-right { padding: 60px 24px 40px !important; align-items: flex-start !important; }
+        }
+      `}</style>
+
       {/* Panneau gauche */}
-      <div style={{ width: '420px', flexShrink: 0, background: '#111010', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="fp-left" style={{ width: '420px', flexShrink: 0, background: '#111010', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'row' }}>
           <div style={{ width: '5px', background: '#111010' }} />
           <div style={{ width: '5px', background: '#9b8ec4' }} />
@@ -52,7 +61,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Panneau droit */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', position: 'relative' }}>
+      <div className="fp-right" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <svg style={{ position: 'absolute', top: 0, right: 0, opacity: 0.06, pointerEvents: 'none' }} width="400" height="400" viewBox="0 0 400 400">
           <polyline points="400,0 180,0 80,200 400,200" fill="none" stroke="#f0eeea" strokeWidth="12" />
           <polyline points="400,14 186,14 86,214 400,214" fill="none" stroke="#9b8ec4" strokeWidth="12" />

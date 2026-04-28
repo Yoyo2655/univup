@@ -29,9 +29,21 @@ export default function RegisterPage() {
     router.push(role === 'prof' ? '/prof' : '/eleve')
   }
 
+  const inputStyle = { width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: '#0e0d0d', fontFamily: "'DM Sans', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
-      <div style={{ width: '420px', flexShrink: 0, background: '#111010', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+      <style>{`
+        .reg-left { display: flex; }
+        .reg-right { padding: 40px; align-items: flex-start; }
+        @media (max-width: 767px) {
+          .reg-left { display: none !important; }
+          .reg-right { padding: 48px 24px 40px !important; }
+        }
+      `}</style>
+
+      {/* Panneau gauche */}
+      <div className="reg-left" style={{ width: '420px', flexShrink: 0, background: '#111010', flexDirection: 'column', justifyContent: 'space-between', padding: '52px 48px', position: 'relative', overflow: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, display: 'flex', flexDirection: 'row' }}>
           <div style={{ width: '5px', background: '#111010' }} />
           <div style={{ width: '5px', background: '#9b8ec4' }} />
@@ -56,13 +68,14 @@ export default function RegisterPage() {
         </div>
         <div>
           <Link href="/cgv" style={{ fontSize: '11px', color: '#2e2d2b', textDecoration: 'none', letterSpacing: '0.3px', display: 'block', marginBottom: '6px' }}>
-            Conditions Générales de Vente →
+            Conditions Generales de Vente →
           </Link>
           <div style={{ fontSize: '11px', color: '#2e2d2b', letterSpacing: '0.3px' }}>© {new Date().getFullYear()} UnivUp</div>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', position: 'relative', overflowY: 'auto' }}>
+      {/* Panneau droit */}
+      <div className="reg-right" style={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', overflowY: 'auto' }}>
         <svg style={{ position: 'absolute', top: 0, right: 0, opacity: 0.06, pointerEvents: 'none' }} width="400" height="400" viewBox="0 0 400 400">
           <polyline points="400,0 180,0 80,200 400,200" fill="none" stroke="#f0eeea" strokeWidth="12" />
           <polyline points="400,14 186,14 86,214 400,214" fill="none" stroke="#9b8ec4" strokeWidth="12" />
@@ -73,7 +86,6 @@ export default function RegisterPage() {
           <p style={{ fontSize: '13px', color: '#4a4847', marginBottom: '28px' }}>Remplis les informations ci-dessous</p>
 
           <form onSubmit={handleRegister}>
-            {/* Role */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Je suis</label>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -85,54 +97,42 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Nom */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Nom complet</label>
-              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Prenom Nom"
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Prenom Nom" style={inputStyle}
                 onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
             </div>
 
-            {/* Email */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="ton@email.com"
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="ton@email.com" style={inputStyle}
                 onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
             </div>
 
-            {/* Mot de passe */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Mot de passe</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min. 6 caracteres"
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min. 6 caracteres" style={inputStyle}
                 onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
             </div>
 
-            {/* Confirmer */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6e6c66', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Confirmer le mot de passe</label>
-              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required placeholder="Retape ton mot de passe"
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f0eeea', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required placeholder="Retape ton mot de passe" style={inputStyle}
                 onFocus={e => e.target.style.borderColor = 'rgba(155,142,196,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
             </div>
 
-            {/* Case CGV */}
-            <div
-              onClick={() => setCgvAccepted(!cgvAccepted)}
-              style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px', background: cgvAccepted ? 'rgba(155,142,196,0.08)' : 'rgba(255,255,255,0.02)', border: cgvAccepted ? '1px solid rgba(155,142,196,0.3)' : '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', cursor: 'pointer', marginBottom: '20px', transition: 'all 0.15s' }}
-            >
+            <div onClick={() => setCgvAccepted(!cgvAccepted)} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px', background: cgvAccepted ? 'rgba(155,142,196,0.08)' : 'rgba(255,255,255,0.02)', border: cgvAccepted ? '1px solid rgba(155,142,196,0.3)' : '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', cursor: 'pointer', marginBottom: '20px', transition: 'all 0.15s' }}>
               <div style={{ width: '18px', height: '18px', borderRadius: '4px', border: cgvAccepted ? '2px solid #9b8ec4' : '2px solid rgba(255,255,255,0.15)', background: cgvAccepted ? '#9b8ec4' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px', transition: 'all 0.15s' }}>
                 {cgvAccepted && <span style={{ color: '#111010', fontSize: '11px', fontWeight: '700' }}>✓</span>}
               </div>
               <span style={{ fontSize: '12px', color: '#6e6c66', lineHeight: 1.6 }}>
                 J'ai lu et j'accepte les{' '}
                 <Link href="/cgv" target="_blank" style={{ color: '#9b8ec4', textDecoration: 'underline' }} onClick={e => e.stopPropagation()}>
-                  Conditions Générales de Vente
+                  Conditions Generales de Vente
                 </Link>
                 {' '}d'UnivUp
               </span>
