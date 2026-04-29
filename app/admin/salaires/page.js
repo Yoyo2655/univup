@@ -28,7 +28,7 @@ export default function SalairesPage() {
   useEffect(() => { fetchProfs() }, [])
 
   async function fetchProfs() {
-    const { data } = await supabase.from('users').select('*').eq('role', 'prof').eq('is_active', true).order('full_name')
+    const { data } = await supabase.from('users').select('*').eq('role', 'prof').order('full_name')
     setProfs(data || [])
     setLoading(false)
   }
