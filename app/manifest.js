@@ -10,12 +10,12 @@ export default function manifest() {
     orientation: 'portrait',
     icons: [
       {
-        src: '/Logo2_univup.jpg',
+        src: '/Logo2_univup.png',
         sizes: '192x192',
         type: 'image/jpeg',
       },
       {
-        src: '/Logo2_univup.jpg',
+        src: '/Logo2_univup.png',
         sizes: '512x512',
         type: 'image/jpeg',
       },
